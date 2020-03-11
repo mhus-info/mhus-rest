@@ -9,6 +9,9 @@ import de.mhus.lib.core.MLog;
 import de.mhus.lib.core.cfg.CfgBoolean;
 import de.mhus.lib.core.security.AccessApi;
 import de.mhus.lib.errors.AccessDeniedException;
+import de.mhus.rest.core.api.Node;
+import de.mhus.rest.core.api.RestApi;
+import de.mhus.rest.core.api.RestNodeService;
 
 public class RestRegistry extends MLog {
 

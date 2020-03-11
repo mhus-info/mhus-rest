@@ -51,10 +51,10 @@ import de.mhus.lib.core.util.MUri;
 import de.mhus.lib.errors.AccessDeniedException;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.HttpRequest;
-import de.mhus.rest.core.Node;
-import de.mhus.rest.core.RestApi;
-import de.mhus.rest.core.RestException;
-import de.mhus.rest.core.RestResult;
+import de.mhus.rest.core.api.Node;
+import de.mhus.rest.core.api.RestApi;
+import de.mhus.rest.core.api.RestException;
+import de.mhus.rest.core.api.RestResult;
 
 /*
  * Test: http://localhost:8182/rest/public/?_action=ping&_method=POST

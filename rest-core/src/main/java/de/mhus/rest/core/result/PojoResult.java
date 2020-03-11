@@ -11,7 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.result;
 
 import java.io.PrintWriter;
 
@@ -22,6 +22,7 @@ import de.mhus.lib.core.MString;
 import de.mhus.lib.core.io.http.MHttp;
 import de.mhus.lib.core.pojo.MPojo;
 import de.mhus.lib.core.pojo.PojoModelFactory;
+import de.mhus.rest.core.api.RestResult;
 
 public class PojoResult implements RestResult {
 

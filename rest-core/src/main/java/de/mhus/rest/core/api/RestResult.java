@@ -11,31 +11,13 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.api;
 
 import java.io.PrintWriter;
 
-import de.mhus.lib.core.MString;
-import de.mhus.lib.core.io.http.MHttp;
+public interface RestResult {
 
-public class PlainTextResult implements RestResult {
+    public void write(PrintWriter writer) throws Exception;
 
-    private String contentType;
-    private String text;
-
-    public PlainTextResult(String text, String contentType) {
-        if (MString.isEmpty(contentType)) contentType = MHttp.CONTENT_TYPE_TEXT;
-        this.contentType = contentType;
-        this.text = text;
-    }
-
-    @Override
-    public void write(PrintWriter writer) throws Exception {
-        writer.write(text);
-    }
-
-    @Override
-    public String getContentType() {
-        return contentType;
-    }
+    public String getContentType();
 }

@@ -11,13 +11,14 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.result;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 
 import de.mhus.lib.core.MFile;
+import de.mhus.rest.core.api.RestResult;
 
 public class BinaryResult implements RestResult {
 

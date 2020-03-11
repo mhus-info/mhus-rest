@@ -16,8 +16,8 @@ package de.mhus.rest.core.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import de.mhus.rest.core.Node;
-import de.mhus.rest.core.RestNodeService;
+import de.mhus.rest.core.api.Node;
+import de.mhus.rest.core.api.RestNodeService;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestNode {

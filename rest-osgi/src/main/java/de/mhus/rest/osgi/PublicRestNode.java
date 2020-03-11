@@ -19,9 +19,9 @@ import org.osgi.service.component.annotations.Component;
 import de.mhus.lib.core.MCast;
 import de.mhus.lib.core.MThread;
 import de.mhus.rest.core.CallContext;
-import de.mhus.rest.core.JsonResult;
-import de.mhus.rest.core.RestNodeService;
-import de.mhus.rest.core.SingleObjectNode;
+import de.mhus.rest.core.api.RestNodeService;
+import de.mhus.rest.core.node.SingleObjectNode;
+import de.mhus.rest.core.result.JsonResult;
 
 @Component(immediate = true, service = RestNodeService.class)
 public class PublicRestNode extends SingleObjectNode<Object> {

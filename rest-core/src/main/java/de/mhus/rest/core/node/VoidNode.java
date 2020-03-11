@@ -11,9 +11,13 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.node;
 
 import java.util.List;
+
+import de.mhus.rest.core.CallContext;
+import de.mhus.rest.core.api.Node;
+import de.mhus.rest.core.result.JsonResult;
 
 /**
  * Use this super class to implement a node without data. The node only implements actions.

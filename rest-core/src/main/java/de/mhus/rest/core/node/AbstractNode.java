@@ -11,7 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.node;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -23,8 +23,16 @@ import de.mhus.lib.core.MLog;
 import de.mhus.lib.core.MSystem;
 import de.mhus.lib.core.pojo.MPojo;
 import de.mhus.lib.errors.UsageException;
+import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.annotation.RestAction;
 import de.mhus.rest.core.annotation.RestNode;
+import de.mhus.rest.core.api.Node;
+import de.mhus.rest.core.api.RestNodeService;
+import de.mhus.rest.core.api.RestResult;
+import de.mhus.rest.core.result.BinaryResult;
+import de.mhus.rest.core.result.JsonResult;
+import de.mhus.rest.core.result.PlainTextResult;
+import de.mhus.rest.core.result.PojoResult;
 
 public abstract class AbstractNode extends MLog implements RestNodeService {
 

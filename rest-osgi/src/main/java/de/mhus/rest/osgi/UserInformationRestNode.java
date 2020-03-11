@@ -20,8 +20,8 @@ import de.mhus.lib.core.security.AaaContext;
 import de.mhus.lib.core.security.AccessApi;
 import de.mhus.lib.errors.NotFoundException;
 import de.mhus.rest.core.CallContext;
-import de.mhus.rest.core.RestNodeService;
-import de.mhus.rest.core.SingleObjectNode;
+import de.mhus.rest.core.api.RestNodeService;
+import de.mhus.rest.core.node.SingleObjectNode;
 
 @Component(immediate = true, service = RestNodeService.class)
 public class UserInformationRestNode extends SingleObjectNode<UserInformation> {

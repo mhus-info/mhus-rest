@@ -11,13 +11,13 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.api;
 
-import java.io.PrintWriter;
+public interface RestNodeService extends Node {
 
-public interface RestResult {
+    String[] getParentNodeCanonicalClassNames();
 
-    public void write(PrintWriter writer) throws Exception;
+    String getNodeId();
 
-    public String getContentType();
+    String getDefaultAcl();
 }

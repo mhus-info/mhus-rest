@@ -1,4 +1,4 @@
-package de.mhus.rest.core;
+package de.mhus.rest.core.result;
 
 import org.codehaus.jackson.node.ObjectNode;
 

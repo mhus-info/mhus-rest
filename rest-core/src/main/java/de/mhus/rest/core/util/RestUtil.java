@@ -11,7 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.util;
 
 import java.util.UUID;
 
@@ -19,6 +19,7 @@ import de.mhus.lib.annotations.generic.Public;
 import de.mhus.lib.core.pojo.PojoModel;
 import de.mhus.lib.core.pojo.PojoModelFactory;
 import de.mhus.lib.core.pojo.PojoParser;
+import de.mhus.rest.core.CallContext;
 
 public class RestUtil {
 

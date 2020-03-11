@@ -24,9 +24,9 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import de.mhus.lib.core.M;
 import de.mhus.lib.core.console.ConsoleTable;
 import de.mhus.osgi.api.karaf.AbstractCmd;
-import de.mhus.rest.core.AbstractNode;
-import de.mhus.rest.core.RestApi;
-import de.mhus.rest.core.RestNodeService;
+import de.mhus.rest.core.api.RestApi;
+import de.mhus.rest.core.api.RestNodeService;
+import de.mhus.rest.core.node.AbstractNode;
 
 @Command(scope = "mhus", name = "rest", description = "REST Call")
 @Service

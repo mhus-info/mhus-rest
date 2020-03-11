@@ -22,6 +22,8 @@ import de.mhus.lib.core.M;
 import de.mhus.lib.core.MCast;
 import de.mhus.lib.core.MProperties;
 import de.mhus.lib.core.io.http.MHttp;
+import de.mhus.rest.core.api.Node;
+import de.mhus.rest.core.api.RestApi;
 
 public class CallContext {
 

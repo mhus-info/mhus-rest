@@ -11,6 +11,17 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.api;
 
-public class HttpResponse {}
+import java.util.List;
+import java.util.Map;
+
+import de.mhus.rest.core.CallContext;
+
+public interface RestApi {
+
+    Node lookup(List<String> parts, Class<? extends Node> lastNode, CallContext context)
+            throws Exception;
+
+    Map<String, RestNodeService> getRestNodeRegistry();
+}

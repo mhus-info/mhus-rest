@@ -11,11 +11,14 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.node;
 
 import de.mhus.lib.errors.NotSupportedException;
+import de.mhus.rest.core.CallContext;
+import de.mhus.rest.core.api.RestResult;
+import de.mhus.rest.core.result.JsonResult;
 
-public abstract class JsonSingleNode<T> extends SingleNode<T> {
+public abstract class JsonListNode<T> extends ListNode<T> {
 
     @Override
     public RestResult doRead(CallContext callContext) throws Exception {
@@ -58,4 +61,17 @@ public abstract class JsonSingleNode<T> extends SingleNode<T> {
     protected void doDelete(JsonResult result, CallContext callContext) throws Exception {
         throw new NotSupportedException();
     }
+
+    /*
+    @Override
+    public RestResult doAction(CallContext callContext) throws Exception {
+    	String methodName = "on" + MPojo.toFunctionName(callContext.getAction(), true, null);
+    	JsonResult result = new JsonResult();
+    	Method method = getClass().getMethod(methodName, JsonResult.class, CallContext.class);
+    	method.invoke(this, result, callContext);
+    	return result;
+
+    }
+    */
+
 }

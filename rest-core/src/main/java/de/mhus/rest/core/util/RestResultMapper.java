@@ -11,12 +11,14 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.util;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import de.mhus.lib.core.logging.ParameterEntryMapper;
+import de.mhus.rest.core.api.RestResult;
+import de.mhus.rest.core.result.JsonResult;
 
 public class RestResultMapper implements ParameterEntryMapper {
 

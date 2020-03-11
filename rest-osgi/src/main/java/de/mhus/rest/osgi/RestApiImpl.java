@@ -30,10 +30,10 @@ import de.mhus.lib.core.MLog;
 import de.mhus.lib.core.cfg.CfgBoolean;
 import de.mhus.lib.core.security.AccessApi;
 import de.mhus.rest.core.CallContext;
-import de.mhus.rest.core.Node;
-import de.mhus.rest.core.RestApi;
-import de.mhus.rest.core.RestNodeService;
 import de.mhus.rest.core.RestRegistry;
+import de.mhus.rest.core.api.Node;
+import de.mhus.rest.core.api.RestApi;
+import de.mhus.rest.core.api.RestNodeService;
 
 @Component(immediate = true)
 public class RestApiImpl extends MLog implements RestApi {

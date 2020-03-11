@@ -11,7 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.core;
+package de.mhus.rest.core.result;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,6 +27,7 @@ import de.mhus.lib.core.logging.LevelMapper;
 import de.mhus.lib.core.logging.TrailLevelMapper;
 import de.mhus.lib.core.security.AaaContext;
 import de.mhus.lib.core.security.AccessApi;
+import de.mhus.rest.core.api.RestResult;
 
 public class JsonResult implements RestResult {
 
