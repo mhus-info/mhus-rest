@@ -13,12 +13,10 @@
  */
 package de.mhus.rest.osgi;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.osgi.service.component.annotations.Component;
 
-import de.mhus.lib.core.M;
-import de.mhus.lib.core.security.AaaContext;
-import de.mhus.lib.core.security.AccessApi;
-import de.mhus.lib.errors.NotFoundException;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.node.SingleObjectNode;
@@ -43,11 +41,9 @@ public class UserInformationRestNode extends SingleObjectNode<UserInformation> {
 
     @Override
     protected UserInformation getObject(CallContext context) throws Exception {
-        AccessApi aaa = M.l(AccessApi.class);
-        if (aaa == null) throw new NotFoundException("AccessApi not configured");
 
-        AaaContext acc = aaa.getCurrentOrGuest();
+        Subject subject = SecurityUtils.getSubject();
 
-        return new UserInformation(acc);
+        return new UserInformation(subject);
     }
 }

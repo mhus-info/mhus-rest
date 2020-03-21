@@ -25,10 +25,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import de.mhus.lib.core.M;
 import de.mhus.lib.core.MLog;
 import de.mhus.lib.core.cfg.CfgBoolean;
-import de.mhus.lib.core.security.AccessApi;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestRegistry;
 import de.mhus.rest.core.api.Node;
@@ -40,17 +38,13 @@ public class RestApiImpl extends MLog implements RestApi {
 
     private BundleContext context;
     private ServiceTracker<RestNodeService, RestNodeService> nodeTracker;
-    private RestRegistry register = new RestRegistry() {
-        @Override
-        public AccessApi getAccesssApi() {
-            return M.l(AccessApi.class);
-        }
-    };
+    private RestRegistry register = new RestRegistry();;
 
     public static final CfgBoolean RELAXED = new CfgBoolean(RestApi.class, "aaaRelaxed", true);
 
     @Activate
     public void doActivate(ComponentContext ctx) {
+        
         context = ctx.getBundleContext();
         nodeTracker =
                 new ServiceTracker<>(
