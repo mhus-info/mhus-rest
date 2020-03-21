@@ -5,9 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.authz.permission.WildcardPermission;
+import org.apache.shiro.subject.Subject;
+
 import de.mhus.lib.core.MLog;
 import de.mhus.lib.core.cfg.CfgBoolean;
-import de.mhus.lib.core.security.AccessApi;
 import de.mhus.lib.errors.AccessDeniedException;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
@@ -18,7 +22,6 @@ public class RestRegistry extends MLog {
     public static final CfgBoolean RELAXED = new CfgBoolean(RestApi.class, "aaaRelaxed", true);
     
     private Map<String, RestNodeService> register = Collections.synchronizedMap(new HashMap<>());
-    private AccessApi accessApi;
     
     public Map<String, RestNodeService> getRegistry() {
         return register;
@@ -39,42 +42,25 @@ public class RestRegistry extends MLog {
         RestNodeService next = register.get(lastNodeId + "-" + name);
         if (next == null) return null;
 
-        AccessApi aaa = getAccesssApi();
-        if (aaa != null) {
-            try {
-                String def = next.getDefaultAcl();
-                if (!aaa.hasResourceAccess(
-                        aaa.getCurrentAccount(), "rest.node", name, "execute", def)) {
-                    log().d(
-                                    "access denied",
-                                    aaa.getCurrentAccount(),
-                                    "rest.node",
-                                    name,
-                                    "execute",
-                                    def);
-                    throw new AccessDeniedException("access denied");
-                }
-                log().d(
-                                "access granted",
-                                aaa.getCurrentAccount(),
-                                "rest.node",
-                                name,
-                                "execute",
-                                def);
-            } catch (Throwable t) {
-                throw new AccessDeniedException("internal error", t);
-            }
-        } else if (!RELAXED.value()) throw new AccessDeniedException("Access api not found");
-
+        Subject subject = SecurityUtils.getSubject();
+        try {
+            subject.checkPermission(new WildcardPermission("rest.node:execute:" + name) );
+            log().d(
+                    "access granted",
+                    subject,
+                    "rest.node",
+                    name,
+                    "execute");
+        } catch (AuthorizationException e) {
+            log().d(
+                    "access denied",
+                    subject,
+                    "rest.node",
+                    name,
+                    "execute");
+            throw new AccessDeniedException("access denied");
+        }
         return next.lookup(parts, context);
     }
 
-    public AccessApi getAccesssApi() {
-        return accessApi;
-    }
-    
-    public void setAccessApi(AccessApi accessApi) {
-        this.accessApi = accessApi;
-    }
-    
 }

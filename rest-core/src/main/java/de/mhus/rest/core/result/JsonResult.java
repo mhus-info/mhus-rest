@@ -16,17 +16,16 @@ package de.mhus.rest.core.result;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
 
-import de.mhus.lib.core.M;
 import de.mhus.lib.core.MApi;
 import de.mhus.lib.core.logging.LevelMapper;
 import de.mhus.lib.core.logging.TrailLevelMapper;
-import de.mhus.lib.core.security.AaaContext;
-import de.mhus.lib.core.security.AccessApi;
 import de.mhus.rest.core.api.RestResult;
 
 public class JsonResult implements RestResult {
@@ -52,9 +51,9 @@ public class JsonResult implements RestResult {
             ((ObjectNode) json).put("_timestamp", System.currentTimeMillis());
             ((ObjectNode) json).put("_sequence", id);
 
-            AaaContext user = M.l(AccessApi.class).getCurrentOrGuest();
-            ((ObjectNode) json).put("_user", user.getAccountId());
-            if (user.isAdminMode()) ((ObjectNode) json).put("_admin", true);
+            Subject subject = SecurityUtils.getSubject();
+            if (subject.isAuthenticated())
+                ((ObjectNode) json).put("_user", String.valueOf(subject.getPrincipal()) );
 
             LevelMapper lm = MApi.get().getLogFactory().getLevelMapper();
             if (lm != null
