@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,14 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-import org.apache.shiro.web.mgt.WebSecurityManager;
-import org.apache.shiro.web.subject.WebSubject;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 
+import de.mhus.lib.core.M;
 import de.mhus.lib.core.MApi;
 import de.mhus.lib.core.MConstants;
 import de.mhus.lib.core.MProperties;
@@ -33,6 +28,7 @@ import de.mhus.lib.core.logging.LevelMapper;
 import de.mhus.lib.core.logging.Log;
 import de.mhus.lib.core.logging.MLogUtil;
 import de.mhus.lib.core.logging.TrailLevelMapper;
+import de.mhus.lib.core.shiro.ShiroSecurity;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestException;
@@ -51,7 +47,6 @@ public abstract class AbstractRestServlet extends HttpServlet {
 
     private int nextId = 0;
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
-    private WebSecurityManager securityManager;
     private RestApi restService;
 
     @Override
@@ -88,7 +83,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
             
             // create shiro Subject and execute
             final AuthenticationToken finalToken = token;
-            WebSubject subject = createSubject(req, resp);
+            Subject subject = M.l(ShiroSecurity.class).createSubject();
             subject.execute(() -> serviceInSession(req, resp, path, finalToken));
 
 
@@ -103,6 +98,8 @@ public abstract class AbstractRestServlet extends HttpServlet {
 
     private Object serviceInSession(HttpServletRequest req, HttpServletResponse resp, String path, AuthenticationToken authToken) throws IOException {
 
+        M.l(ShiroSecurity.class).updateSessionLastAccessTime();
+        
         // id
         long id = newId();
         // subject
@@ -284,47 +281,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
                 null);
         return null;
     }
-    
-    protected void updateSessionLastAccessTime(ServletRequest request, ServletResponse response) {
-        if (!isHttpSessions()) { //'native' sessions
-            Subject subject = SecurityUtils.getSubject();
-            //Subject should never _ever_ be null, but just in case:
-            if (subject != null) {
-                Session session = subject.getSession(false);
-                if (session != null) {
-                    try {
-                        session.touch();
-                    } catch (Throwable t) {
-                        log.e("session.touch() method invocation has failed.  Unable to update " +
-                                "the corresponding session's last access time based on the incoming request.", t);
-                    }
-                }
-            }
-        }
-    }
-    
-    protected boolean isHttpSessions() {
-        return getSecurityManager().isHttpSessionMode();
-    }
-    
-    protected WebSubject createSubject(ServletRequest request, ServletResponse response) {
-        return new WebSubject.Builder(getSecurityManager(), request, response).buildWebSubject();
-    }
-    
-    public WebSecurityManager getSecurityManager() {
-        if (securityManager == null)
-            securityManager = createSecuritymanager();
-        return securityManager;
-    }
 
-    protected WebSecurityManager createSecuritymanager() {
-        return new DefaultWebSecurityManager();
-    }
-
-    public void setSecurityManager(WebSecurityManager sm) {
-        this.securityManager = sm;
-    }
-    
     private void logAccess(
             long id,
             String remoteAddr,
