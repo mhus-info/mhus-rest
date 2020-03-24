@@ -28,7 +28,7 @@ import de.mhus.lib.core.logging.LevelMapper;
 import de.mhus.lib.core.logging.Log;
 import de.mhus.lib.core.logging.MLogUtil;
 import de.mhus.lib.core.logging.TrailLevelMapper;
-import de.mhus.lib.core.shiro.ShiroSecurity;
+import de.mhus.lib.core.shiro.AccessApi;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestException;
@@ -83,7 +83,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
             
             // create shiro Subject and execute
             final AuthenticationToken finalToken = token;
-            Subject subject = M.l(ShiroSecurity.class).createSubject();
+            Subject subject = M.l(AccessApi.class).createSubject();
             subject.execute(() -> serviceInSession(req, resp, path, finalToken));
 
 
@@ -98,7 +98,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
 
     private Object serviceInSession(HttpServletRequest req, HttpServletResponse resp, String path, AuthenticationToken authToken) throws IOException {
 
-        M.l(ShiroSecurity.class).updateSessionLastAccessTime();
+        M.l(AccessApi.class).updateSessionLastAccessTime();
         
         // id
         long id = newId();
