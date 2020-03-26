@@ -42,6 +42,7 @@
 							de.mhus.rest.core.*;version=${project.version}
 						</Export-Package>
 						<Import-Package>
+						  org.newsclub.net.unix;resolution:=optional,
 						  *
 						</Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
