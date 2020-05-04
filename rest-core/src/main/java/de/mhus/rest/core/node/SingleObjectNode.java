@@ -15,9 +15,9 @@ package de.mhus.rest.core.node;
 
 import org.codehaus.jackson.node.ObjectNode;
 
+import de.mhus.lib.core.operation.OperationResult;
 import de.mhus.lib.core.pojo.MPojo;
 import de.mhus.lib.core.pojo.PojoModelFactory;
-import de.mhus.lib.core.strategy.OperationResult;
 import de.mhus.lib.errors.MException;
 import de.mhus.lib.errors.NotFoundException;
 import de.mhus.rest.core.CallContext;
