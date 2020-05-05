@@ -13,8 +13,8 @@
  */
 package de.mhus.rest.core.util;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.mhus.lib.core.logging.ParameterEntryMapper;
 import de.mhus.rest.core.api.RestResult;

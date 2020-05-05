@@ -13,7 +13,7 @@
  */
 package de.mhus.rest.core.node;
 
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.mhus.lib.core.operation.OperationResult;
 import de.mhus.lib.core.pojo.MPojo;

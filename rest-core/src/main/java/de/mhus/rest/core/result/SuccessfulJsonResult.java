@@ -1,6 +1,6 @@
 package de.mhus.rest.core.result;
 
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 public class SuccessfulJsonResult extends JsonResult {

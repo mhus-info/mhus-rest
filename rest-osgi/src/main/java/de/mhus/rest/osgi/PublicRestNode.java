@@ -13,8 +13,9 @@
  */
 package de.mhus.rest.osgi;
 
-import org.codehaus.jackson.node.ObjectNode;
 import org.osgi.service.component.annotations.Component;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.mhus.lib.core.MCast;
 import de.mhus.lib.core.MThread;
