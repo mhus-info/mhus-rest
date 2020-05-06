@@ -19,12 +19,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>rest-osgi</artifactId>
+	<artifactId>rest-osgi-servlet</artifactId>
 	<packaging>bundle</packaging>
 	<parent>
 		<groupId>de.mhus.rest</groupId>
 		<artifactId>mhus-rest</artifactId>
-		<version>7.0.0</version>
+		<version>7.0.0-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -38,16 +38,12 @@
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Export-Package>
-							de.mhus.rest.osgi.*;version=${project.version},
-							de.mhus.rest.core.*;version=${project.version}
+							de.mhus.rest.servlet.*;version=${project.version}
 						</Export-Package>
 						<Import-Package>
-						  org.newsclub.net.unix;resolution:=optional,
 						  *
 						</Import-Package>
-						<DynamicImport-Package>*</DynamicImport-Package>
-						<Service-Component>de.mhus.rest.osgi.*</Service-Component>
-						<Embed-Dependency>rest-core</Embed-Dependency>
+						<Service-Component>de.mhus.rest.servlet.*</Service-Component>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -126,6 +122,10 @@
         <dependency>
             <groupId>de.mhus.rest</groupId>
             <artifactId>rest-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.mhus.rest</groupId>
+            <artifactId>rest-osgi</artifactId>
         </dependency>
         
         <dependency>

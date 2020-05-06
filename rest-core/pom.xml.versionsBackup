@@ -24,7 +24,7 @@
 	<parent>
 		<groupId>de.mhus.rest</groupId>
 		<artifactId>mhus-rest</artifactId>
-		<version>7.0.0</version>
+		<version>7.0.0-SNAPSHOT</version>
 	</parent>
 	
     <build>
