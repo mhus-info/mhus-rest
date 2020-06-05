@@ -24,9 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import de.mhus.lib.core.MApi;
-import de.mhus.lib.core.logging.LevelMapper;
-import de.mhus.lib.core.logging.TrailLevelMapper;
 import de.mhus.rest.core.api.RestResult;
 
 public class JsonResult implements RestResult {
@@ -55,12 +52,6 @@ public class JsonResult implements RestResult {
             Subject subject = SecurityUtils.getSubject();
             if (subject.isAuthenticated())
                 ((ObjectNode) json).put("_user", String.valueOf(subject.getPrincipal()) );
-
-            LevelMapper lm = MApi.get().getLogFactory().getLevelMapper();
-            if (lm != null
-                    && lm instanceof TrailLevelMapper
-                    && ((TrailLevelMapper) lm).isLocalTrail())
-                ((ObjectNode) json).put("_trail", ((TrailLevelMapper) lm).getTrailId());
         }
 
         m.writeValue(writer, json);

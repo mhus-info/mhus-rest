@@ -3,9 +3,12 @@ package de.mhus.rest.core;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,19 +24,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.mhus.lib.core.M;
-import de.mhus.lib.core.MApi;
-import de.mhus.lib.core.MConstants;
 import de.mhus.lib.core.MProperties;
+import de.mhus.lib.core.MString;
+import de.mhus.lib.core.cfg.CfgString;
 import de.mhus.lib.core.io.http.MHttp;
-import de.mhus.lib.core.logging.LevelMapper;
+import de.mhus.lib.core.logging.ITracer;
 import de.mhus.lib.core.logging.Log;
-import de.mhus.lib.core.logging.MLogUtil;
-import de.mhus.lib.core.logging.TrailLevelMapper;
 import de.mhus.lib.core.shiro.AccessApi;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestException;
 import de.mhus.rest.core.api.RestResult;
+import io.opentracing.Scope;
+import io.opentracing.SpanContext;
+import io.opentracing.propagation.Format;
+import io.opentracing.propagation.TextMap;
+import io.opentracing.tag.Tags;
 
 public abstract class AbstractRestServlet extends HttpServlet {
 
@@ -49,51 +55,103 @@ public abstract class AbstractRestServlet extends HttpServlet {
     private int nextId = 0;
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
     private RestApi restService;
+    private CfgString CFG_TRACE_ACTIVE = new CfgString(getClass(), "traceActivation", "");
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp)
+    protected void service(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // System.out.println(">>> " + req.getPathInfo());
-        resp.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Origin", "*");
 
-        boolean isTrailEnabled = false;
+        Scope scope = null;
         try {
-            String trail = req.getParameter(MConstants.LOG_MAPPER);
-            if (trail != null) {
-                LevelMapper lm = MApi.get().getLogFactory().getLevelMapper();
-                if (lm != null && lm instanceof TrailLevelMapper) {
-                    isTrailEnabled = true;
-                    if (trail.length() == 0) trail = MLogUtil.MAP_LABEL;
-                    ((TrailLevelMapper) lm).doConfigureTrail(MLogUtil.TRAIL_SOURCE_REST, trail);
-                }
+        	
+            final String path = request.getPathInfo();
+
+            SpanContext parentSpanCtx = ITracer.get().tracer().extract(Format.Builtin.HTTP_HEADERS, new TextMap() {
+
+				@Override
+				public Iterator<Entry<String, String>> iterator() {
+						final Enumeration<String> enu = request.getHeaderNames();
+						return new Iterator<Entry<String,String>>() {
+							@Override
+							public boolean hasNext() {
+								return enu.hasMoreElements();
+							}
+
+							@Override
+							public Entry<String, String> next() {
+								final String key = enu.nextElement();
+								return new Entry<String, String>() {
+
+									@Override
+									public String getKey() {
+										return key;
+									}
+
+									@Override
+									public String getValue() {
+										return request.getHeader(key);
+									}
+
+									@Override
+									public String setValue(String value) {
+										return null;
+									}
+									
+								};
+							}
+						};
+				}
+
+				@Override
+				public void put(String key, String value) {
+					
+				}
+            });
+        	
+            String trace = request.getParameter("_trace");
+            if (MString.isEmpty(trace)) 
+            	trace = CFG_TRACE_ACTIVE.value();
+            
+            if (parentSpanCtx == null) {
+            	scope = ITracer.get().start("rest", trace );
+            } else
+            if (parentSpanCtx != null) {
+            	scope = ITracer.get().tracer().buildSpan("rest").asChildOf(parentSpanCtx).startActive(true);
+            }
+            
+            if (MString.isSet(trace))
+            	ITracer.get().activate(trace);
+            
+            if (scope != null) {
+                Tags.SPAN_KIND.set(scope.span(), Tags.SPAN_KIND_SERVER);
+                Tags.HTTP_METHOD.set(scope.span(), request.getMethod());
+                Tags.HTTP_URL.set(scope.span(), request.getRequestURL().toString());
             }
 
-            final String path = req.getPathInfo();
 
             if (path == null || path.length() < 1) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
 
             // authenticate
             AuthenticationToken token = null;
             for (RestAuthenticator authenticator : authenticators) {
-                token = authenticator.authenticate(req);
+                token = authenticator.authenticate(request);
                 if (token != null) break;
             }
             
             // create shiro Subject and execute
             final AuthenticationToken finalToken = token;
             Subject subject = M.l(AccessApi.class).createSubject();
-            subject.execute(() -> serviceInSession(req, resp, path, finalToken));
+            subject.execute(() -> serviceInSession(request, response, path, finalToken));
 
 
         } finally {
-            if (isTrailEnabled) {
-                LevelMapper lm = MApi.get().getLogFactory().getLevelMapper();
-                if (lm != null && lm instanceof TrailLevelMapper)
-                    ((TrailLevelMapper) lm).doResetTrail();
-            }
+        	if (scope != null)
+        		scope.close();
         }
     }
 
@@ -371,9 +429,6 @@ public abstract class AbstractRestServlet extends HttpServlet {
             ObjectNode json = m.createObjectNode();
             json.put("_sequence", id);
             if (user != null) json.put("_user", String.valueOf(user.getPrincipal()));
-            LevelMapper lm = MApi.get().getLogFactory().getLevelMapper();
-            if (lm != null && lm instanceof TrailLevelMapper)
-                json.put("_trail", ((TrailLevelMapper) lm).getTrailId());
             json.put("_error", errNr);
             json.put("_errorMessage", errMsg);
             resp.setContentType("application/json");
