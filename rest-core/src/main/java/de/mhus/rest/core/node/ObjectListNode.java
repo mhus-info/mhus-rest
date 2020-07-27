@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.mhus.lib.core.pojo.MPojo;
 import de.mhus.lib.core.pojo.PojoModelFactory;
 import de.mhus.lib.errors.MException;
+import de.mhus.lib.errors.NotFoundException;
+import de.mhus.lib.errors.NotSupportedException;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.result.JsonResult;
 import de.mhus.rest.core.util.RestUtil;
@@ -68,5 +70,57 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
     //
     //		RestUtil.updateObject(callContext, obj, true);
     //	}
+
+    @Override
+    protected void doUpdate(JsonResult result, CallContext callContext) throws Exception {
+        
+        T obj = getObjectFromContext(callContext, getManagedClassName());
+        if (obj == null)
+            throw new NotFoundException();
+        
+        doUpdateObj(obj, callContext);
+        
+        PojoModelFactory schema = getPojoModelFactory();
+        doPrepareForOutput(obj, callContext);
+        ObjectNode jRoot = result.createObjectNode();
+        MPojo.pojoToJson(obj, jRoot, schema, true);
+    }
+
+    @Override
+    protected void doCreate(JsonResult result, CallContext callContext) throws Exception {
+        
+        T obj = doCreateObj(callContext);
+
+        PojoModelFactory schema = getPojoModelFactory();
+        doPrepareForOutput(obj, callContext);
+        ObjectNode jRoot = result.createObjectNode();
+        MPojo.pojoToJson(obj, jRoot, schema, true);
+    }
+
+    @Override
+    protected void doDelete(JsonResult result, CallContext callContext) throws Exception {
+        T obj = getObjectFromContext(callContext, getManagedClassName());
+        if (obj == null)
+            throw new NotFoundException();
+
+        doDeleteObj(obj, callContext);
+        
+        PojoModelFactory schema = getPojoModelFactory();
+        doPrepareForOutput(obj, callContext);
+        ObjectNode jRoot = result.createObjectNode();
+        MPojo.pojoToJson(obj, jRoot, schema, true);
+    }
+
+    protected T doCreateObj(CallContext callContext) throws Exception {
+        throw new NotSupportedException();
+    }
+
+    protected void doUpdateObj(T obj, CallContext callContext) throws Exception {
+        throw new NotSupportedException();
+    }
+
+    protected void doDeleteObj(T obj, CallContext callContext) throws Exception {
+        throw new NotSupportedException();
+    }
 
 }
