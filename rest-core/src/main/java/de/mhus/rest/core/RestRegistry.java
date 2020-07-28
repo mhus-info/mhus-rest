@@ -12,6 +12,7 @@ import org.apache.shiro.subject.Subject;
 
 import de.mhus.lib.core.MLog;
 import de.mhus.lib.core.cfg.CfgBoolean;
+import de.mhus.lib.core.shiro.AccessUtil;
 import de.mhus.lib.errors.AccessDeniedException;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
@@ -42,23 +43,46 @@ public class RestRegistry extends MLog {
         RestNodeService next = register.get(lastNodeId + "-" + name);
         if (next == null) return null;
 
-        Subject subject = SecurityUtils.getSubject();
-        try {
-            subject.checkPermission(new WildcardPermission("rest.node:execute:" + name) );
-            log().d(
-                    "access granted",
-                    subject,
-                    "rest.node",
-                    name,
-                    "execute");
-        } catch (AuthorizationException e) {
-            log().d(
-                    "access denied",
-                    subject,
-                    "rest.node",
-                    name,
-                    "execute");
-            throw new AccessDeniedException("access denied");
+        if (context.getAuthorisation() == null) {
+            Subject subject = SecurityUtils.getSubject();
+            try {
+                if (AccessUtil.isAnnotated(next.getClass()))
+                    AccessUtil.checkPermission(next.getClass());
+                else // default access check
+                    subject.checkPermission(new WildcardPermission("rest.node:execute:" + name) );
+                log().d(
+                        "access granted",
+                        subject,
+                        "rest.node",
+                        name,
+                        "execute");
+            } catch (AuthorizationException e) {
+                log().d(
+                        "access denied",
+                        subject,
+                        "rest.node",
+                        name,
+                        "execute");
+                throw new AccessDeniedException("access denied");
+            }
+        } else {
+            try {
+                Subject subject = context.getAuthorisation().authorize(this, name, lastNode, context);
+                log().d(
+                        "access granted",
+                        subject,
+                        "rest.node",
+                        name,
+                        "execute");
+            } catch (Throwable t) {
+                log().d(
+                        "access denied",
+                        null,
+                        "rest.node",
+                        name,
+                        "execute");
+                throw new AccessDeniedException("access denied");
+            }
         }
         return next.lookup(parts, context);
     }

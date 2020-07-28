@@ -13,7 +13,7 @@ public class RestAuthenticatorByBasicAuth implements RestAuthenticator {
     @Override
     public AuthenticationToken authenticate(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
-        if (!auth.toUpperCase().startsWith("BASIC ")) {
+        if (auth == null || !auth.toUpperCase().startsWith("BASIC ")) {
             return null; // we only do BASIC
         }
         // Get encoded user and password, comes after "BASIC "

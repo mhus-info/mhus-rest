@@ -32,6 +32,7 @@ public class CallContext {
     private HttpRequest req;
     private MHttp.METHOD method;
     private IProperties context;
+    private RestAuthorisation authorisation;
 
     public CallContext(HttpRequest req, MHttp.METHOD method, IProperties context) {
         this.req = req;
@@ -112,4 +113,13 @@ public class CallContext {
         RestApi restService = M.l(RestApi.class);
         return restService.lookup(parts, lastNode, this);
     }
+
+    public RestAuthorisation getAuthorisation() {
+        return authorisation;
+    }
+
+    public void setAuthorisation(RestAuthorisation authorisation) {
+        this.authorisation = authorisation;
+    }
+
 }

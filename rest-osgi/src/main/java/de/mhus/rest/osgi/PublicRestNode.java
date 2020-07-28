@@ -13,20 +13,33 @@
  */
 package de.mhus.rest.osgi;
 
+import java.util.List;
+
 import org.osgi.service.component.annotations.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import de.mhus.lib.annotations.generic.Public;
 import de.mhus.lib.core.MCast;
 import de.mhus.lib.core.MThread;
 import de.mhus.rest.core.CallContext;
+import de.mhus.rest.core.PublicRestAuthenticator;
+import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.node.SingleObjectNode;
 import de.mhus.rest.core.result.JsonResult;
 
 @Component(immediate = true, service = RestNodeService.class)
+@Public()
 public class PublicRestNode extends SingleObjectNode<Object> {
 
+    
+    @Override
+    public Node lookup(List<String> parts, CallContext callContext) throws Exception {
+        callContext.setAuthorisation(new PublicRestAuthenticator());
+        return super.lookup(parts, callContext);
+    }
+    
     @Override
     public String[] getParentNodeCanonicalClassNames() {
         return new String[] {ROOT_PARENT};

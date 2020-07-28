@@ -17,7 +17,11 @@ import javax.servlet.Servlet;
 
 import org.osgi.service.component.annotations.Component;
 
+import de.mhus.lib.core.M;
 import de.mhus.rest.core.AbstractRestServlet;
+import de.mhus.rest.core.RestAuthenticatorByBasicAuth;
+import de.mhus.rest.core.RestAuthenticatorByTicket;
+import de.mhus.rest.core.api.RestApi;
 
 /*
  * Test: http://localhost:8182/rest/public/?_action=ping&_method=POST
@@ -31,4 +35,14 @@ public class RestServlet extends AbstractRestServlet {
 
     private static final long serialVersionUID = 1L;
 
+    public RestServlet() {
+        getAuthenticators().add(new RestAuthenticatorByBasicAuth());
+        getAuthenticators().add(new RestAuthenticatorByTicket());
+    }
+    
+    @Override
+    public RestApi getRestService() {
+        return M.l(RestApi.class);
+    }
+    
 }

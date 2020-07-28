@@ -46,7 +46,8 @@ public abstract class AbstractRestServlet extends HttpServlet {
     private static final String RESULT_TYPE_JSON = "json";
     private static final String RESULT_TYPE_HTTP = "http";
 
-    private static final String PUBLIC_PATH = "/public/";
+    private static final String PUBLIC_PATH_START = "/public/";
+    private static final String PUBLIC_PATH = "/public";
 
     private Log log = Log.getLog(this);
 
@@ -300,7 +301,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
     }
 
     public boolean isPublicPath(String path) {
-        return path.startsWith(PUBLIC_PATH);
+        return path.startsWith(PUBLIC_PATH_START) || path.equals(PUBLIC_PATH);
     }
 
     public RestApi getRestService() {
