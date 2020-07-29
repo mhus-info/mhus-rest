@@ -26,7 +26,7 @@ public class UserInformationRestNode extends SingleObjectNode<UserInformation> {
 
     @Override
     public String[] getParentNodeCanonicalClassNames() {
-        return new String[] {PUBLIC_PARENT};
+        return new String[] {PublicRestNode.class.getCanonicalName()};
     }
 
     @Override
