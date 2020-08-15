@@ -39,10 +39,9 @@ public class RestServlet extends AbstractRestServlet {
         getAuthenticators().add(new RestAuthenticatorByBasicAuth());
         getAuthenticators().add(new RestAuthenticatorByTicket());
     }
-    
+
     @Override
     public RestApi getRestService() {
         return M.l(RestApi.class);
     }
-    
 }

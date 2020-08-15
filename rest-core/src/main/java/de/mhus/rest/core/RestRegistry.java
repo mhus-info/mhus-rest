@@ -21,15 +21,14 @@ import de.mhus.rest.core.api.RestNodeService;
 public class RestRegistry extends MLog {
 
     public static final CfgBoolean RELAXED = new CfgBoolean(RestApi.class, "aaaRelaxed", true);
-    
+
     private Map<String, RestNodeService> register = Collections.synchronizedMap(new HashMap<>());
-    
+
     public Map<String, RestNodeService> getRegistry() {
         return register;
     }
 
-    public Node lookup(List<String> parts, CallContext context)
-            throws Exception {
+    public Node lookup(List<String> parts, CallContext context) throws Exception {
         return lookup(parts, null, context);
     }
 
@@ -49,42 +48,22 @@ public class RestRegistry extends MLog {
                 if (AccessUtil.isAnnotated(next.getClass()))
                     AccessUtil.checkPermission(next.getClass());
                 else // default access check
-                    subject.checkPermission(new WildcardPermission("rest.node:execute:" + name) );
-                log().d(
-                        "access granted",
-                        subject,
-                        "rest.node",
-                        name,
-                        "execute");
+                subject.checkPermission(new WildcardPermission("rest.node:execute:" + name));
+                log().d("access granted", subject, "rest.node", name, "execute");
             } catch (AuthorizationException e) {
-                log().d(
-                        "access denied",
-                        subject,
-                        "rest.node",
-                        name,
-                        "execute");
+                log().d("access denied", subject, "rest.node", name, "execute");
                 throw new AccessDeniedException("access denied");
             }
         } else {
             try {
-                Subject subject = context.getAuthorisation().authorize(this, name, lastNode, context);
-                log().d(
-                        "access granted",
-                        subject,
-                        "rest.node",
-                        name,
-                        "execute");
+                Subject subject =
+                        context.getAuthorisation().authorize(this, name, lastNode, context);
+                log().d("access granted", subject, "rest.node", name, "execute");
             } catch (Throwable t) {
-                log().d(
-                        "access denied",
-                        null,
-                        "rest.node",
-                        name,
-                        "execute");
+                log().d("access denied", null, "rest.node", name, "execute");
                 throw new AccessDeniedException("access denied");
             }
         }
         return next.lookup(parts, context);
     }
-
 }

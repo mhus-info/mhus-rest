@@ -51,7 +51,7 @@ public class JsonResult implements RestResult {
 
             Subject subject = SecurityUtils.getSubject();
             if (subject.isAuthenticated())
-                ((ObjectNode) json).put("_user", String.valueOf(subject.getPrincipal()) );
+                ((ObjectNode) json).put("_user", String.valueOf(subject.getPrincipal()));
         }
 
         m.writeValue(writer, json);

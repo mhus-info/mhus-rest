@@ -30,21 +30,21 @@ public class JsonRestNode extends AbstractNode {
         doCreate(result, context);
         return result;
     }
-    
+
     @Override
     public RestResult doDelete(CallContext context) throws Exception {
         JsonResult result = new JsonResult();
         doDelete(result, context);
         return result;
     }
-    
+
     @Override
     public RestResult doUpdate(CallContext context) throws Exception {
         JsonResult result = new JsonResult();
         doUpdate(result, context);
         return result;
     }
-    
+
     @Override
     public RestResult doAction(CallContext context) throws Exception {
         JsonResult result = new JsonResult();
@@ -71,5 +71,4 @@ public class JsonRestNode extends AbstractNode {
     protected void doAction(JsonResult result, CallContext context) {
         throw new NotSupportedException();
     }
-
 }

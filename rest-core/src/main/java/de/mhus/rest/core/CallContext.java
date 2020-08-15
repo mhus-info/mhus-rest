@@ -121,5 +121,4 @@ public class CallContext {
     public void setAuthorisation(RestAuthorisation authorisation) {
         this.authorisation = authorisation;
     }
-
 }

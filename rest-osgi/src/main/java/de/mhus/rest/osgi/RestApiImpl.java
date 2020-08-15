@@ -44,7 +44,7 @@ public class RestApiImpl extends MLog implements RestApi {
 
     @Activate
     public void doActivate(ComponentContext ctx) {
-        
+
         context = ctx.getBundleContext();
         nodeTracker =
                 new ServiceTracker<>(
@@ -73,8 +73,8 @@ public class RestApiImpl extends MLog implements RestApi {
                         if (x.length() > 0
                                 && !x.contains(
                                         ".")) // print a warning - class name without dot should be
-                                              // a mistake
-                        log().w(
+                            // a mistake
+                            log().w(
                                             "Register RestNode with malformed parent name - should be a class",
                                             service.getClass(),
                                             service.getNodeId(),

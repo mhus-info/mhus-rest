@@ -33,13 +33,12 @@ import de.mhus.rest.core.result.JsonResult;
 @Public()
 public class PublicRestNode extends SingleObjectNode<Object> {
 
-    
     @Override
     public Node lookup(List<String> parts, CallContext callContext) throws Exception {
         callContext.setAuthorisation(new PublicRestAuthenticator());
         return super.lookup(parts, callContext);
     }
-    
+
     @Override
     public String[] getParentNodeCanonicalClassNames() {
         return new String[] {ROOT_PARENT};

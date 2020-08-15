@@ -27,9 +27,8 @@ public class RestAuthenticatorByBasicAuth implements RestAuthenticator {
         String pass = null;
         if (parts.length > 0) account = MUri.decode(parts[0]);
         if (parts.length > 1) pass = MUri.decode(parts[1]);
-        
+
         UsernamePasswordToken token = new UsernamePasswordToken(account, pass);
         return token;
     }
-
 }

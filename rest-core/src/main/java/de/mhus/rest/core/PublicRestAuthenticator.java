@@ -8,10 +8,12 @@ import de.mhus.rest.core.api.Node;
 public class PublicRestAuthenticator implements RestAuthorisation {
 
     @Override
-    public Subject authorize(RestRegistry restRegistry, String name, Class<? extends Node> lastNode,
+    public Subject authorize(
+            RestRegistry restRegistry,
+            String name,
+            Class<? extends Node> lastNode,
             CallContext context) {
         Subject subject = SecurityUtils.getSubject();
         return subject;
     }
-
 }

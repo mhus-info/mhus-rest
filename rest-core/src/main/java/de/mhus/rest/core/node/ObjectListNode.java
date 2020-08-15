@@ -73,13 +73,12 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
 
     @Override
     protected void doUpdate(JsonResult result, CallContext callContext) throws Exception {
-        
+
         T obj = getObjectFromContext(callContext, getManagedClassName());
-        if (obj == null)
-            throw new NotFoundException();
-        
+        if (obj == null) throw new NotFoundException();
+
         doUpdateObj(obj, callContext);
-        
+
         PojoModelFactory schema = getPojoModelFactory();
         doPrepareForOutput(obj, callContext);
         ObjectNode jRoot = result.createObjectNode();
@@ -88,7 +87,7 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
 
     @Override
     protected void doCreate(JsonResult result, CallContext callContext) throws Exception {
-        
+
         T obj = doCreateObj(callContext);
 
         PojoModelFactory schema = getPojoModelFactory();
@@ -100,11 +99,10 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
     @Override
     protected void doDelete(JsonResult result, CallContext callContext) throws Exception {
         T obj = getObjectFromContext(callContext, getManagedClassName());
-        if (obj == null)
-            throw new NotFoundException();
+        if (obj == null) throw new NotFoundException();
 
         doDeleteObj(obj, callContext);
-        
+
         PojoModelFactory schema = getPojoModelFactory();
         doPrepareForOutput(obj, callContext);
         ObjectNode jRoot = result.createObjectNode();
@@ -122,5 +120,4 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
     protected void doDeleteObj(T obj, CallContext callContext) throws Exception {
         throw new NotSupportedException();
     }
-
 }

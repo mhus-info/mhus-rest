@@ -6,6 +6,9 @@ import de.mhus.rest.core.api.Node;
 
 public interface RestAuthorisation {
 
-    Subject authorize(RestRegistry restRegistry, String name, Class<? extends Node> lastNode, CallContext context);
-
+    Subject authorize(
+            RestRegistry restRegistry,
+            String name,
+            Class<? extends Node> lastNode,
+            CallContext context);
 }

@@ -66,71 +66,75 @@ public abstract class AbstractRestServlet extends HttpServlet {
 
         Scope scope = null;
         try {
-        	
+
             final String path = request.getPathInfo();
 
-            SpanContext parentSpanCtx = ITracer.get().tracer().extract(Format.Builtin.HTTP_HEADERS, new TextMap() {
+            SpanContext parentSpanCtx =
+                    ITracer.get()
+                            .tracer()
+                            .extract(
+                                    Format.Builtin.HTTP_HEADERS,
+                                    new TextMap() {
 
-				@Override
-				public Iterator<Entry<String, String>> iterator() {
-						final Enumeration<String> enu = request.getHeaderNames();
-						return new Iterator<Entry<String,String>>() {
-							@Override
-							public boolean hasNext() {
-								return enu.hasMoreElements();
-							}
+                                        @Override
+                                        public Iterator<Entry<String, String>> iterator() {
+                                            final Enumeration<String> enu =
+                                                    request.getHeaderNames();
+                                            return new Iterator<Entry<String, String>>() {
+                                                @Override
+                                                public boolean hasNext() {
+                                                    return enu.hasMoreElements();
+                                                }
 
-							@Override
-							public Entry<String, String> next() {
-								final String key = enu.nextElement();
-								return new Entry<String, String>() {
+                                                @Override
+                                                public Entry<String, String> next() {
+                                                    final String key = enu.nextElement();
+                                                    return new Entry<String, String>() {
 
-									@Override
-									public String getKey() {
-										return key;
-									}
+                                                        @Override
+                                                        public String getKey() {
+                                                            return key;
+                                                        }
 
-									@Override
-									public String getValue() {
-										return request.getHeader(key);
-									}
+                                                        @Override
+                                                        public String getValue() {
+                                                            return request.getHeader(key);
+                                                        }
 
-									@Override
-									public String setValue(String value) {
-										return null;
-									}
-									
-								};
-							}
-						};
-				}
+                                                        @Override
+                                                        public String setValue(String value) {
+                                                            return null;
+                                                        }
+                                                    };
+                                                }
+                                            };
+                                        }
 
-				@Override
-				public void put(String key, String value) {
-					
-				}
-            });
-        	
+                                        @Override
+                                        public void put(String key, String value) {}
+                                    });
+
             String trace = request.getParameter("_trace");
-            if (MString.isEmpty(trace)) 
-            	trace = CFG_TRACE_ACTIVE.value();
-            
+            if (MString.isEmpty(trace)) trace = CFG_TRACE_ACTIVE.value();
+
             if (parentSpanCtx == null) {
-            	scope = ITracer.get().start("rest", trace );
-            } else
-            if (parentSpanCtx != null) {
-            	scope = ITracer.get().tracer().buildSpan("rest").asChildOf(parentSpanCtx).startActive(true);
+                scope = ITracer.get().start("rest", trace);
+            } else if (parentSpanCtx != null) {
+                scope =
+                        ITracer.get()
+                                .tracer()
+                                .buildSpan("rest")
+                                .asChildOf(parentSpanCtx)
+                                .startActive(true);
             }
-            
-            if (MString.isSet(trace))
-            	ITracer.get().activate(trace);
-            
+
+            if (MString.isSet(trace)) ITracer.get().activate(trace);
+
             if (scope != null) {
                 Tags.SPAN_KIND.set(scope.span(), Tags.SPAN_KIND_SERVER);
                 Tags.HTTP_METHOD.set(scope.span(), request.getMethod());
                 Tags.HTTP_URL.set(scope.span(), request.getRequestURL().toString());
             }
-
 
             if (path == null || path.length() < 1) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -143,23 +147,26 @@ public abstract class AbstractRestServlet extends HttpServlet {
                 token = authenticator.authenticate(request);
                 if (token != null) break;
             }
-            
+
             // create shiro Subject and execute
             final AuthenticationToken finalToken = token;
             Subject subject = M.l(AccessApi.class).createSubject();
             subject.execute(() -> serviceInSession(request, response, path, finalToken));
 
-
         } finally {
-        	if (scope != null)
-        		scope.close();
+            if (scope != null) scope.close();
         }
     }
 
-    private Object serviceInSession(HttpServletRequest req, HttpServletResponse resp, String path, AuthenticationToken authToken) throws IOException {
+    private Object serviceInSession(
+            HttpServletRequest req,
+            HttpServletResponse resp,
+            String path,
+            AuthenticationToken authToken)
+            throws IOException {
 
         M.l(AccessApi.class).updateSessionLastAccessTime();
-        
+
         // id
         long id = newId();
         // subject
@@ -192,20 +199,18 @@ public abstract class AbstractRestServlet extends HttpServlet {
                 return onLoginFailure(authToken, e, req, resp, id);
             }
         }
-        
+
         // check for public access
         if (authToken == null && !isPublicPath(path)) {
             return onLoginFailure(req, resp, id);
         }
-        
+
         // create call context object
         CallContext callContext =
                 new CallContext(
-                        new HttpRequest(req.getParameterMap()),
-                        MHttp.toMethod(method),
-                        context);
+                        new HttpRequest(req.getParameterMap()), MHttp.toMethod(method), context);
 
-        RestApi restService = getRestService(); 
+        RestApi restService = getRestService();
 
         RestResult res = null;
 
@@ -245,13 +250,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
 
             if (res == null) {
                 sendError(
-                        id,
-                        req,
-                        resp,
-                        HttpServletResponse.SC_NOT_IMPLEMENTED,
-                        null,
-                        null,
-                        subject);
+                        id, req, resp, HttpServletResponse.SC_NOT_IMPLEMENTED, null, null, subject);
                 return null;
             }
 
@@ -276,14 +275,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
 
         } catch (RestException t) {
             log.d(t);
-            sendError(
-                    id,
-                    req,
-                    resp,
-                    t.getErrorId(),
-                    t.getMessage(),
-                    t,
-                    subject);
+            sendError(id, req, resp, t.getErrorId(), t.getMessage(), t, subject);
             return null;
         } catch (Throwable t) {
             log.d(t);
@@ -312,33 +304,24 @@ public abstract class AbstractRestServlet extends HttpServlet {
         this.restService = service;
     }
 
-    private Object onLoginFailure(AuthenticationToken authToken, AuthenticationException e, HttpServletRequest req,
-            HttpServletResponse resp, long id) throws IOException {
+    private Object onLoginFailure(
+            AuthenticationToken authToken,
+            AuthenticationException e,
+            HttpServletRequest req,
+            HttpServletResponse resp,
+            long id)
+            throws IOException {
 
         resp.setHeader("WWW-Authenticate", "BASIC realm=\"rest\"");
-        sendError(
-                id,
-                req,
-                resp,
-                HttpServletResponse.SC_UNAUTHORIZED,
-                e.getMessage(),
-                e,
-                null);
+        sendError(id, req, resp, HttpServletResponse.SC_UNAUTHORIZED, e.getMessage(), e, null);
         return null;
     }
 
-    private Object onLoginFailure(HttpServletRequest req,
-            HttpServletResponse resp, long id) throws IOException {
+    private Object onLoginFailure(HttpServletRequest req, HttpServletResponse resp, long id)
+            throws IOException {
 
         resp.setHeader("WWW-Authenticate", "BASIC realm=\"rest\"");
-        sendError(
-                id,
-                req,
-                resp,
-                HttpServletResponse.SC_UNAUTHORIZED,
-                "",
-                null,
-                null);
+        sendError(id, req, resp, HttpServletResponse.SC_UNAUTHORIZED, "", null, null);
         return null;
     }
 
@@ -442,5 +425,4 @@ public abstract class AbstractRestServlet extends HttpServlet {
     public LinkedList<RestAuthenticator> getAuthenticators() {
         return authenticators;
     }
-
 }

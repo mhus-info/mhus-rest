@@ -29,5 +29,4 @@ public class UserInformation {
     public String getName() {
         return name;
     }
-
 }

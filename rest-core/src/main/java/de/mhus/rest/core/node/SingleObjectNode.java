@@ -53,10 +53,7 @@ public abstract class SingleObjectNode<T> extends JsonSingleNode<T> {
         if (obj == null) throw new RestException(OperationResult.NOT_FOUND);
 
         doUpdate(obj, callContext);
-        
     }
-    
-    protected void doUpdate(T obj, CallContext context)
-            throws MException {}
-    
+
+    protected void doUpdate(T obj, CallContext context) throws MException {}
 }

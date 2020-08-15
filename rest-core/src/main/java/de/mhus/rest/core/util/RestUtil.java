@@ -38,7 +38,6 @@ public class RestUtil {
                 }
             };
 
-
     public static String getObjectIdParameterName(Class<?> clazz) {
         return clazz.getSimpleName().toLowerCase() + "Id";
     }
