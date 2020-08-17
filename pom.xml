@@ -61,7 +61,6 @@
     <modules>
         <module>rest-core</module>
         <module>rest-osgi</module>
-        <module>rest-osgi-servlet</module>
         <module>rest-karaf</module>
     </modules>
 

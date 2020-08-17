@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.servlet;
+package de.mhus.rest.osgi;
 
 import javax.servlet.Servlet;
 
-import org.osgi.service.component.annotations.Component;
-
+import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.lib.core.M;
 import de.mhus.rest.core.AbstractRestServlet;
 import de.mhus.rest.core.RestAuthenticatorByBasicAuth;
@@ -26,10 +25,10 @@ import de.mhus.rest.core.RestAuthenticatorByTicket;
 import de.mhus.rest.core.api.RestApi;
 
 /*
+ * Activate: sb-create de.mhus.rest.osgi.RestServlet
  * Test: http://localhost:8182/rest/public/?_action=ping&_method=POST
  */
-@Component(
-        immediate = true,
+@ServiceComponent(
         name = "RestServlet",
         service = Servlet.class,
         property = "alias=/rest/*")
