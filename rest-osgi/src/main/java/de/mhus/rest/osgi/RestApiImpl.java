@@ -15,9 +15,9 @@
  */
 package de.mhus.rest.osgi;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -165,22 +165,19 @@ public class RestApiImpl extends MLog implements RestApi {
         }
     }
     
-    public void sendString(Node node, String message) {
+    @Override
+    public void forEachSocket(Node node, Consumer<RestSocket> f) {
         String nodeId = getNodeId(node);
         List<RestSocket> list = null;
         synchronized (sockets) {
             list = sockets.getClone(nodeId);
         }
-        list.forEach(v -> v.sendString(message));
+        list.forEach(v -> {
+                if (!v.isClosed())
+                    f.accept(v);
+//                    v.getSubject().execute(() -> f.accept(v) ); // not needed should be done by caller if recommended
+                }
+            );
     }
-    
-    public void sendBytes(Node node, ByteBuffer message) {
-        String nodeId = getNodeId(node);
-        List<RestSocket> list = null;
-        synchronized (sockets) {
-            list = sockets.getClone(nodeId);
-        }
-        list.forEach(v -> v.sendBytes(message));
-    }
-    
+
 }

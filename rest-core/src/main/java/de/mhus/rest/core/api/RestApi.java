@@ -17,6 +17,7 @@ package de.mhus.rest.core.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestSocket;
@@ -35,5 +36,7 @@ public interface RestApi {
     void unregister(RestSocket socket);
 
     void register(RestSocket socket);
+
+    void forEachSocket(Node node, Consumer<RestSocket> f);
     
 }
