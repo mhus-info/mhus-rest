@@ -28,8 +28,10 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.lib.core.M;
+import de.mhus.lib.core.MPeriod;
 import de.mhus.lib.core.MProperties;
 import de.mhus.lib.core.MString;
+import de.mhus.lib.core.cfg.CfgLong;
 import de.mhus.lib.core.cfg.CfgString;
 import de.mhus.lib.core.io.http.MHttp;
 import de.mhus.lib.core.logging.ITracer;
@@ -74,6 +76,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
     private CfgString CFG_TRACE_ACTIVE = new CfgString(getClass(), "traceActivation", "");
+    private CfgLong CFG_IDLE_TIMEOUT = new CfgLong(getClass(), "idleTimeout", MPeriod.HOUR_IN_MILLISECOUNDS);
     private Set<RestWebSocket> sessions = Collections.synchronizedSet(new HashSet<>());
     private Log log = Log.getLog(this);
     private int nextId = 0;
@@ -104,8 +107,11 @@ public class RestWebSocketServlet extends WebSocketServlet {
     public void onWebSocketConnect(RestWebSocket socket, Session session) {
         
         try {
+            
+            session.setIdleTimeout(CFG_IDLE_TIMEOUT.value());
+            
             UpgradeRequest request = session.getUpgradeRequest();
-            final String path = request.getRequestURI().getPath();
+            final String path = preparePath(request.getRequestURI().getPath());
 
             SpanContext parentSpanCtx =
                     ITracer.get()
@@ -135,6 +141,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
             if (path == null || path.length() < 1) {
                 session.getUpgradeResponse().setStatusCode(HttpServletResponse.SC_NOT_FOUND);
                 session.close(HttpServletResponse.SC_NOT_FOUND,"not found");
+                session.setIdleTimeout(1000);
                 return;
             }
 
@@ -174,8 +181,16 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
     }
 
+    private String preparePath(String path) {
+        if (path == null) return null;
+        int pos = path.indexOf('/', 1);
+        if (pos < 0) return "";
+        return path.substring(pos);
+    }
+
     private void onLoginFailure(RestWebSocket socket) {
         socket.session.getUpgradeResponse().setHeader("WWW-Authenticate", "BASIC realm=\"rest\"");
+        socket.session.getUpgradeResponse().setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
         onError(socket, null, HttpServletResponse.SC_UNAUTHORIZED, null, true);
     }
 
@@ -185,7 +200,14 @@ public class RestWebSocketServlet extends WebSocketServlet {
         synchronized (socket) {
             if (socket.isClosed())
                 return;
+            try {
+                socket.session.getRemote().sendString("{_action:\"close\",_rc:"+rc+"}\n");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             socket.session.close(rc, msg);
+            socket.session.setIdleTimeout(1000);
             socket.session = null;
             getRestService().unregister(socket);
         }
@@ -200,6 +222,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
         // id
         long id = newId();
         socket.id = id;
+        session.getUpgradeResponse().addHeader("RemoteIdent", String.valueOf(id));
         // subject
         Subject subject = SecurityUtils.getSubject();
         // parts of path

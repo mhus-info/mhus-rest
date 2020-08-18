@@ -38,5 +38,9 @@ public interface RestApi {
     void register(RestSocket socket);
 
     void forEachSocket(Node node, Consumer<RestSocket> f);
+
+    List<String> getSocketIds();
+    
+    int getSocketCount(String nodeId);
     
 }

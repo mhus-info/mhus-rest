@@ -15,6 +15,7 @@
  */
 package de.mhus.rest.osgi;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -178,6 +179,18 @@ public class RestApiImpl extends MLog implements RestApi {
 //                    v.getSubject().execute(() -> f.accept(v) ); // not needed should be done by caller if recommended
                 }
             );
+    }
+
+    @Override
+    public List<String> getSocketIds() {
+        return new ArrayList<>(sockets.keySet());
+    }
+
+    @Override
+    public int getSocketCount(String nodeId) {
+        List<RestSocket> list = sockets.get(nodeId);
+        if (list == null) return 0;
+        return list.size();
     }
 
 }
