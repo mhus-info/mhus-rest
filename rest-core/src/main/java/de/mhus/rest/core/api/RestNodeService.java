@@ -19,7 +19,7 @@ public interface RestNodeService extends Node {
 
     String[] getParentNodeCanonicalClassNames();
 
-    String getNodeId();
+    String getNodeName();
 
     String getDefaultAcl();
 }

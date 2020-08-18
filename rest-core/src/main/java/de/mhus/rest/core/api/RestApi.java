@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.mhus.rest.core.CallContext;
+import de.mhus.rest.core.RestSocket;
 
 public interface RestApi {
 
@@ -26,4 +27,13 @@ public interface RestApi {
             throws Exception;
 
     Map<String, RestNodeService> getRestNodeRegistry();
+
+    String getNodeId(Node node);
+
+    Node getNode(String ident);
+
+    void unregister(RestSocket socket);
+
+    void register(RestSocket socket);
+    
 }

@@ -15,8 +15,6 @@
  */
 package de.mhus.rest.core;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
@@ -26,7 +24,7 @@ import de.mhus.lib.core.util.MUri;
 public class RestAuthenticatorByBasicAuth implements RestAuthenticator {
 
     @Override
-    public AuthenticationToken authenticate(HttpServletRequest req) {
+    public AuthenticationToken authenticate(RestRequest req) {
         String auth = req.getHeader("Authorization");
         if (auth == null || !auth.toUpperCase().startsWith("BASIC ")) {
             return null; // we only do BASIC

@@ -32,7 +32,7 @@ public class UserInformationRestNode extends SingleObjectNode<UserInformation> {
     }
 
     @Override
-    public String getNodeId() {
+    public String getNodeName() {
         return "uid";
     }
 

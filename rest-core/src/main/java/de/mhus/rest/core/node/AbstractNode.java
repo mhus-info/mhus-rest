@@ -22,10 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import de.mhus.lib.core.MLog;
+import de.mhus.lib.core.MString;
 import de.mhus.lib.core.MSystem;
 import de.mhus.lib.core.pojo.MPojo;
 import de.mhus.lib.errors.UsageException;
 import de.mhus.rest.core.CallContext;
+import de.mhus.rest.core.RestSocket;
 import de.mhus.rest.core.annotation.RestAction;
 import de.mhus.rest.core.annotation.RestNode;
 import de.mhus.rest.core.api.Node;
@@ -170,7 +172,7 @@ public abstract class AbstractNode extends MLog implements RestNodeService {
     }
 
     @Override
-    public String getNodeId() {
+    public String getNodeName() {
         if (nodeDef == null) throw new UsageException("parent node not defined");
         return nodeDef.name();
     }
@@ -208,4 +210,20 @@ public abstract class AbstractNode extends MLog implements RestNodeService {
     public static <T> T getObjectFromContext(CallContext callContext, String clazz) {
         return (T) callContext.get(clazz + OBJECT);
     }
+    
+    @Override
+    public boolean streamingAccept(RestSocket socket) {
+        return false;
+    }
+
+    @Override
+    public void streamingText(RestSocket socket, String message) {
+        
+    }
+
+    @Override
+    public void streamingBinary(RestSocket socket, byte[] payload, int offset, int len) {
+        streamingText(socket, new String(payload, offset, len, MString.CHARSET_CHARSET_UTF_8));
+    }
+
 }

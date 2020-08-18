@@ -47,7 +47,7 @@ public class PublicRestNode extends SingleObjectNode<Object> {
     }
 
     @Override
-    public String getNodeId() {
+    public String getNodeName() {
         return PUBLIC_NODE_NAME;
     }
 

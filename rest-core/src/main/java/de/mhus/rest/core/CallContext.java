@@ -31,12 +31,12 @@ public class CallContext {
 
     public static final String ACTION_PARAMETER = "_action";
 
-    private HttpRequest req;
+    private RestRequest req;
     private MHttp.METHOD method;
     private IProperties context;
     private RestAuthorisation authorisation;
 
-    public CallContext(HttpRequest req, MHttp.METHOD method, IProperties context) {
+    public CallContext(RestRequest req, MHttp.METHOD method, IProperties context) {
         this.req = req;
         this.method = method;
         this.context = context;
@@ -91,7 +91,7 @@ public class CallContext {
         return context.get(key);
     }
 
-    public HttpRequest getRequest() {
+    public RestRequest getRequest() {
         return req;
     }
 

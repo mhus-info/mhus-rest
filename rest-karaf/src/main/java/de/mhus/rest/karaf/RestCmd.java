@@ -77,7 +77,7 @@ public class RestCmd extends AbstractCmd {
 
                 table.addRowValues(
                         entry.getKey().getClass().getCanonicalName(),
-                        entry.getKey().getNodeId(),
+                        entry.getKey().getNodeName(),
                         managed,
                         entry.getKey().getParentNodeCanonicalClassNames(),
                         entry.getValue());

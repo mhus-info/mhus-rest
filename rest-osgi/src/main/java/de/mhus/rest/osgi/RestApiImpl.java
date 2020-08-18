@@ -15,8 +15,11 @@
  */
 package de.mhus.rest.osgi;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -29,8 +32,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import de.mhus.lib.core.MLog;
 import de.mhus.lib.core.cfg.CfgBoolean;
+import de.mhus.lib.core.util.WeakMapList;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestRegistry;
+import de.mhus.rest.core.RestSocket;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
@@ -40,7 +45,8 @@ public class RestApiImpl extends MLog implements RestApi {
 
     private BundleContext context;
     private ServiceTracker<RestNodeService, RestNodeService> nodeTracker;
-    private RestRegistry register = new RestRegistry();;
+    private RestRegistry register = new RestRegistry();
+    private WeakMapList<String, RestSocket> sockets = new WeakMapList<>();
 
     public static final CfgBoolean RELAXED = new CfgBoolean(RestApi.class, "aaaRelaxed", true);
 
@@ -79,9 +85,9 @@ public class RestApiImpl extends MLog implements RestApi {
                             log().w(
                                             "Register RestNode with malformed parent name - should be a class",
                                             service.getClass(),
-                                            service.getNodeId(),
+                                            service.getNodeName(),
                                             x);
-                        String key = x + "-" + service.getNodeId();
+                        String key = x + "-" + service.getNodeName();
                         log().i("register", key, service.getClass().getCanonicalName());
                         register.getRegistry().put(key, service);
                     }
@@ -100,13 +106,17 @@ public class RestApiImpl extends MLog implements RestApi {
                 ServiceReference<RestNodeService> reference, RestNodeService service) {
 
             if (service != null) {
+                
+                String nodeId = service.getNodeName();
                 for (String x : service.getParentNodeCanonicalClassNames()) {
                     if (x != null) {
-                        String key = x + "-" + service.getNodeId();
+                        String key = x + "-" + nodeId;
                         log().i("unregister", key, service.getClass().getCanonicalName());
                         register.getRegistry().remove(key);
                     }
                 }
+                sockets.getClone(nodeId).forEach(v -> v.close(HttpServletResponse.SC_RESET_CONTENT, null));
+                sockets.remove(nodeId);
             }
         }
     }
@@ -121,4 +131,56 @@ public class RestApiImpl extends MLog implements RestApi {
             throws Exception {
         return register.lookup(parts, lastNode, context);
     }
+
+    @Override
+    public String getNodeId(Node node) {
+        //return node instanceof RestNodeService ? ((RestNodeService)node).getNodeId() : node.getClass().getCanonicalName();
+        return node.getClass().getCanonicalName();
+    }
+    
+    @Override
+    public Node getNode(String ident) {
+//        String suffix = "-" + ident;
+//        for (Entry<String, RestNodeService> entry : register.getRegistry().entrySet())
+//            if (entry.getKey().endsWith(suffix)) return entry.getValue();
+        for (RestNodeService entry : register.getRegistry().values())
+            if (entry.getClass().getCanonicalName().equals(ident))
+                return entry;
+        return null;
+    }
+
+    @Override
+    public void unregister(RestSocket socket) {
+        String nodeId = socket.getNodeId();
+        synchronized (sockets) {
+            sockets.removeEntry(nodeId, socket);
+        }
+    }
+
+    @Override
+    public void register(RestSocket socket) {
+        String nodeId = socket.getNodeId();
+        synchronized (sockets) {
+            sockets.putEntry(nodeId, socket);
+        }
+    }
+    
+    public void sendString(Node node, String message) {
+        String nodeId = getNodeId(node);
+        List<RestSocket> list = null;
+        synchronized (sockets) {
+            list = sockets.getClone(nodeId);
+        }
+        list.forEach(v -> v.sendString(message));
+    }
+    
+    public void sendBytes(Node node, ByteBuffer message) {
+        String nodeId = getNodeId(node);
+        List<RestSocket> list = null;
+        synchronized (sockets) {
+            list = sockets.getClone(nodeId);
+        }
+        list.forEach(v -> v.sendBytes(message));
+    }
+    
 }

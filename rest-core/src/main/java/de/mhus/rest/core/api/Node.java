@@ -18,6 +18,7 @@ package de.mhus.rest.core.api;
 import java.util.List;
 
 import de.mhus.rest.core.CallContext;
+import de.mhus.rest.core.RestSocket;
 
 public interface Node {
 
@@ -38,4 +39,11 @@ public interface Node {
     RestResult doUpdate(CallContext callContext) throws Exception;
 
     RestResult doDelete(CallContext callContext) throws Exception;
+
+    boolean streamingAccept(RestSocket socket);
+
+    void streamingText(RestSocket socket, String message);
+
+    void streamingBinary(RestSocket socket, byte[] payload, int offset, int len);
+
 }

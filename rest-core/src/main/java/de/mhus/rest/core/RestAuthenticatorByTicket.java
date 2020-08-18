@@ -15,15 +15,13 @@
  */
 package de.mhus.rest.core;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
 public class RestAuthenticatorByTicket implements RestAuthenticator {
 
     @Override
-    public AuthenticationToken authenticate(HttpServletRequest req) {
+    public AuthenticationToken authenticate(RestRequest req) {
         String ticket = req.getParameter("_ticket");
         if (ticket == null) return null;
 
