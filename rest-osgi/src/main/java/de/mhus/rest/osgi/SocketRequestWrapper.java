@@ -1,5 +1,6 @@
 package de.mhus.rest.osgi;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,11 @@ public class SocketRequestWrapper implements RestRequest {
     @Override
     public Set<String> getParameterNames() {
         return request.getParameterMap().keySet();
+    }
+
+    @Override
+    public InputStream getLoadContent() {
+        return null;
     }
 
 }

@@ -16,6 +16,7 @@
 package de.mhus.rest.osgi;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -45,6 +46,7 @@ import de.mhus.lib.core.io.http.MHttp;
 import de.mhus.lib.core.logging.ITracer;
 import de.mhus.lib.core.logging.Log;
 import de.mhus.lib.core.shiro.AccessApi;
+import de.mhus.lib.core.util.Provider;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestAuthenticator;
 import de.mhus.rest.core.RestAuthenticatorByBasicAuth;
@@ -202,7 +204,18 @@ public class RestServlet extends HttpServlet {
         // create call context object
         CallContext callContext =
                 new CallContext(
-                        new CachedRestRequest(req.getParameterMap(), null), MHttp.toMethod(method), context);
+                        new CachedRestRequest(req.getParameterMap(), null, new Provider<InputStream>() {
+                            
+                            @Override
+                            public InputStream get() {
+                                try {
+                                    return req.getInputStream();
+                                } catch (IOException e) {
+                                    log.d(e);
+                                    return null;
+                                }
+                            }
+                        }), MHttp.toMethod(method), context);
 
         RestApi restService = getRestService();
 

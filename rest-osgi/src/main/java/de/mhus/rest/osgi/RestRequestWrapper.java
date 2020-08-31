@@ -1,5 +1,7 @@
 package de.mhus.rest.osgi;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,6 +35,15 @@ public class RestRequestWrapper implements RestRequest {
         while (enu.hasMoreElements())
             out.add(enu.nextElement());
         return out;
+    }
+
+    @Override
+    public InputStream getLoadContent() {
+        try {
+            return request.getInputStream();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
 }

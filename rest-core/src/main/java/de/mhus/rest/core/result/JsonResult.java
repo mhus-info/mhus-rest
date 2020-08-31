@@ -72,7 +72,7 @@ public class JsonResult implements RestResult {
         return json;
     }
 
-    public void setJson(ObjectNode json) {
+    public void setJson(JsonNode json) {
         this.json = json;
     }
 

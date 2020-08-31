@@ -239,7 +239,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
         // create call context object
         CallContext callContext =
                 new CallContext(
-                        CachedRestRequest.transformFromLists(request.getParameterMap(), request.getHeaders()), MHttp.METHOD.GET, context);
+                        CachedRestRequest.transformFromLists(request.getParameterMap(), request.getHeaders(), null), MHttp.METHOD.GET, context);
 
         socket.context = callContext;
         RestApi restService = getRestService();

@@ -15,6 +15,7 @@
  */
 package de.mhus.rest.core;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -123,4 +124,9 @@ public class CallContext {
     public void setAuthorisation(RestAuthorisation authorisation) {
         this.authorisation = authorisation;
     }
+    
+    public InputStream getLoadContent() {
+        return req.getLoadContent();
+    }
+    
 }
