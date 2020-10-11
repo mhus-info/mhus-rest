@@ -50,6 +50,7 @@ import de.mhus.lib.core.util.Provider;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestAuthenticator;
 import de.mhus.rest.core.RestAuthenticatorByBasicAuth;
+import de.mhus.rest.core.RestAuthenticatorByJwt;
 import de.mhus.rest.core.RestAuthenticatorByTicket;
 import de.mhus.rest.core.RestRequest;
 import de.mhus.rest.core.api.Node;
@@ -91,6 +92,7 @@ public class RestServlet extends HttpServlet {
     
     protected void doInitialize() {
         getAuthenticators().add(new RestAuthenticatorByBasicAuth());
+        getAuthenticators().add(new RestAuthenticatorByJwt());
         getAuthenticators().add(new RestAuthenticatorByTicket());
     }
 

@@ -17,24 +17,16 @@ package de.mhus.rest.osgi;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
-import org.osgi.service.component.annotations.Component;
 
+import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.rest.core.CallContext;
+import de.mhus.rest.core.annotation.RestNode;
 import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.node.SingleObjectNode;
 
-@Component(immediate = true, service = RestNodeService.class)
+@ServiceComponent(service = RestNodeService.class)
+@RestNode(parentNode = PublicRestNode.class, name="uid")
 public class UserInformationRestNode extends SingleObjectNode<UserInformation> {
-
-    @Override
-    public String[] getParentNodeCanonicalClassNames() {
-        return new String[] {PublicRestNode.class.getCanonicalName()};
-    }
-
-    @Override
-    public String getNodeName() {
-        return "uid";
-    }
 
     //	@Override
     //	public Class<UserInformation> getManagedClass() {

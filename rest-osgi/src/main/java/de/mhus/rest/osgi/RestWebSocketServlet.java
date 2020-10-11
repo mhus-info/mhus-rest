@@ -40,6 +40,7 @@ import de.mhus.lib.core.shiro.AccessApi;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestAuthenticator;
 import de.mhus.rest.core.RestAuthenticatorByBasicAuth;
+import de.mhus.rest.core.RestAuthenticatorByJwt;
 import de.mhus.rest.core.RestAuthenticatorByTicket;
 import de.mhus.rest.core.RestRequest;
 import de.mhus.rest.core.api.Node;
@@ -88,6 +89,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
     protected void doInitialize() {
         getAuthenticators().add(new RestAuthenticatorByBasicAuth());
         getAuthenticators().add(new RestAuthenticatorByTicket());
+        getAuthenticators().add(new RestAuthenticatorByJwt());
     }
 
     public RestApi getRestService() {
