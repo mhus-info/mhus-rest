@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.osgi;
+package de.mhus.rest.osgi.nodes;
 
 import java.util.List;
-
-import org.osgi.service.component.annotations.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.mhus.lib.annotations.generic.Public;
+import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.lib.core.MCast;
 import de.mhus.lib.core.MThread;
 import de.mhus.rest.core.CallContext;
@@ -31,7 +30,7 @@ import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.node.SingleObjectNode;
 import de.mhus.rest.core.result.JsonResult;
 
-@Component(immediate = true, service = RestNodeService.class)
+@ServiceComponent(service = RestNodeService.class)
 @Public()
 public class PublicRestNode extends SingleObjectNode<Object> {
 

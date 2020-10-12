@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.osgi;
+package de.mhus.rest.osgi.nodes;
 
 import org.apache.shiro.subject.Subject;
 

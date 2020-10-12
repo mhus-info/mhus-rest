@@ -7,12 +7,12 @@ public class RestAuthenticatorByJwt implements RestAuthenticator {
 
     @Override
     public AuthenticationToken authenticate(RestRequest req) {
-        String token = req.getParameter("jwt_ticket");
-        if (token != null)
+        String token = req.getParameter("jwt_token");
+        if (token != null) 
             return new BearerToken(token);
         String auth = req.getHeader("Authorization");
-        if (auth == null || !auth.toUpperCase().startsWith("Bearer ")) {
-            return null; // we only do BASIC
+        if (auth == null || !auth.startsWith("Bearer ")) {
+            return null; // we only do Bearer
         }
         token = auth.substring(7);
         return new BearerToken(token);
