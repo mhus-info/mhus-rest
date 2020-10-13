@@ -50,7 +50,7 @@ import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
 
 /*
- * Activate: sb-create de.mhus.rest.osgi.RestWebSocketServlet
+ * Activate: blue-create de.mhus.rest.osgi.RestWebSocketServlet
  * Test: 
  * curl --include \
      --no-buffer \

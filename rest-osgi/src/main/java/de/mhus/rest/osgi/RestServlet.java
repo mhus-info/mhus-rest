@@ -63,7 +63,7 @@ import io.opentracing.propagation.Format;
 import io.opentracing.tag.Tags;
 
 /*
- * Activate: sb-create de.mhus.rest.osgi.RestServlet
+ * Activate: blue-create de.mhus.rest.osgi.RestServlet
  * Test: http://localhost:8182/rest/public/?_action=ping&_method=POST
  */
 @ServiceComponent(
