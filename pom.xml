@@ -31,10 +31,6 @@
 	<name>mhus-rest</name>
 	<description>Rest framework for deep rest structures.</description>
 	<url>http://www.mhus.de</url>
-    <properties>
-       <cherry-reactive.version>${project.version}</cherry-reactive.version>
-       <cherry-reactive-plugin.version>7.0.0</cherry-reactive-plugin.version>
-    </properties>
 
 	<licenses>
 		<license>
@@ -45,8 +41,8 @@
 	</licenses>
 	
 	<scm>
-		<url>https://github.com/mhus/cherry-reactive</url>
-		<connection>scm:git:https://github.com/mhus/cherry-reactive/</connection>
+		<url>https://github.com/mhus/mhus-rest</url>
+		<connection>scm:git:https://github.com/mhus/mhus-rest/</connection>
 	</scm>
 	
 	<developers>
