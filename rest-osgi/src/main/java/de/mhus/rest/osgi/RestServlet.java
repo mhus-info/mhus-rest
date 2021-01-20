@@ -66,10 +66,7 @@ import io.opentracing.tag.Tags;
  * Activate: blue-create de.mhus.rest.osgi.RestServlet
  * Test: http://localhost:8182/rest/public/?_action=ping&_method=POST
  */
-@ServiceComponent(
-        name = "RestServlet",
-        service = Servlet.class,
-        property = "alias=/rest/*")
+@ServiceComponent(name = "RestServlet", service = Servlet.class, property = "alias=/rest/*")
 public class RestServlet extends HttpServlet {
 
     private static final String RESULT_TYPE_JSON = "json";
@@ -89,7 +86,7 @@ public class RestServlet extends HttpServlet {
     public RestServlet() {
         doInitialize();
     }
-    
+
     protected void doInitialize() {
         getAuthenticators().add(new RestAuthenticatorByBasicAuth());
         getAuthenticators().add(new RestAuthenticatorByJwt());
@@ -99,7 +96,7 @@ public class RestServlet extends HttpServlet {
     public RestApi getRestService() {
         return M.l(RestApi.class);
     }
-    
+
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -115,10 +112,7 @@ public class RestServlet extends HttpServlet {
             SpanContext parentSpanCtx =
                     ITracer.get()
                             .tracer()
-                            .extract(
-                                    Format.Builtin.HTTP_HEADERS,
-                                    new RestTraceMap(request)
-                                    );
+                            .extract(Format.Builtin.HTTP_HEADERS, new RestTraceMap(request));
 
             String trace = request.getParameter("_trace");
             if (MString.isEmpty(trace)) trace = CFG_TRACE_ACTIVE.value();
@@ -206,18 +200,23 @@ public class RestServlet extends HttpServlet {
         // create call context object
         CallContext callContext =
                 new CallContext(
-                        new CachedRestRequest(req.getParameterMap(), null, new Provider<InputStream>() {
-                            
-                            @Override
-                            public InputStream get() {
-                                try {
-                                    return req.getInputStream();
-                                } catch (IOException e) {
-                                    log.d(e);
-                                    return null;
-                                }
-                            }
-                        }), MHttp.toMethod(method), context);
+                        new CachedRestRequest(
+                                req.getParameterMap(),
+                                null,
+                                new Provider<InputStream>() {
+
+                                    @Override
+                                    public InputStream get() {
+                                        try {
+                                            return req.getInputStream();
+                                        } catch (IOException e) {
+                                            log.d(e);
+                                            return null;
+                                        }
+                                    }
+                                }),
+                        MHttp.toMethod(method),
+                        context);
 
         RestApi restService = getRestService();
 
@@ -437,5 +436,4 @@ public class RestServlet extends HttpServlet {
     public LinkedList<RestAuthenticator> getAuthenticators() {
         return authenticators;
     }
-
 }

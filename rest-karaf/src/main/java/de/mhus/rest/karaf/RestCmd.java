@@ -38,9 +38,7 @@ public class RestCmd extends AbstractCmd {
             index = 0,
             name = "cmd",
             required = true,
-            description = "Command:\n" 
-                    + " list\n"
-                    + " sockets\n",
+            description = "Command:\n" + " list\n" + " sockets\n",
             multiValued = false)
     String cmd;
 
@@ -64,8 +62,7 @@ public class RestCmd extends AbstractCmd {
                 table.addRowValues(id, restService.getSocketCount(id));
             }
             table.print();
-        } else
-        if (cmd.equals("list")) {
+        } else if (cmd.equals("list")) {
             HashMap<RestNodeService, LinkedList<String>> list =
                     new HashMap<RestNodeService, LinkedList<String>>();
             for (Entry<String, RestNodeService> entry :

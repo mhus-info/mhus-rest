@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2020 Mike Hummel (mh@mhus.de)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.mhus.rest.osgi;
 
 import java.io.IOException;
@@ -20,7 +35,7 @@ public class RestWebSocket implements WebSocketListener, RestSocket {
     long id;
     String node;
     CallContext context;
-    
+
     public RestWebSocket(RestWebSocketServlet servlet) {
         this.servlet = servlet;
     }
@@ -80,7 +95,7 @@ public class RestWebSocket implements WebSocketListener, RestSocket {
     public String getNodeId() {
         return node;
     }
-    
+
     @Override
     public String toString() {
         return node + ":" + id;
@@ -95,7 +110,7 @@ public class RestWebSocket implements WebSocketListener, RestSocket {
             // TODO log? close?
         }
     }
-    
+
     @Override
     public void sendBytes(ByteBuffer message) {
         if (isClosed()) return;
@@ -105,5 +120,4 @@ public class RestWebSocket implements WebSocketListener, RestSocket {
             // TODO log? close?
         }
     }
-
 }

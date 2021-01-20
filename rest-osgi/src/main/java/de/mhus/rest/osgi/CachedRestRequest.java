@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2020 Mike Hummel (mh@mhus.de)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.mhus.rest.osgi;
 
 import java.io.InputStream;
@@ -17,7 +32,10 @@ public class CachedRestRequest implements RestRequest {
     private Map<String, String[]> headers;
     private Provider<InputStream> loadProvider;
 
-    public CachedRestRequest(Map<String, String[]> parametersMap, Map<String, String[]> headersMap, Provider<InputStream> loadProvider ) {
+    public CachedRestRequest(
+            Map<String, String[]> parametersMap,
+            Map<String, String[]> headersMap,
+            Provider<InputStream> loadProvider) {
         this.parameters = parametersMap;
         this.headers = headersMap;
         this.loadProvider = loadProvider;
@@ -55,8 +73,10 @@ public class CachedRestRequest implements RestRequest {
         return parameters.keySet();
     }
 
-    public static RestRequest transformFromLists(Map<String, List<String>> parameterMap,
-            Map<String, List<String>> headersMap, Provider<InputStream> loadProvider) {
+    public static RestRequest transformFromLists(
+            Map<String, List<String>> parameterMap,
+            Map<String, List<String>> headersMap,
+            Provider<InputStream> loadProvider) {
         Map<String, String[]> parameters = new HashMap<>();
         if (parameterMap != null) {
             for (Entry<String, List<String>> entry : parameterMap.entrySet()) {
@@ -76,5 +96,4 @@ public class CachedRestRequest implements RestRequest {
     public InputStream getLoadContent() {
         return loadProvider == null ? null : loadProvider.get();
     }
-
 }

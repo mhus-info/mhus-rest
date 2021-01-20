@@ -45,5 +45,4 @@ public interface Node {
     void streamingText(RestSocket socket, String message);
 
     void streamingBinary(RestSocket socket, byte[] payload, int offset, int len);
-
 }

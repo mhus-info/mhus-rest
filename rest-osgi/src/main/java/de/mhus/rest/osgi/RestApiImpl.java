@@ -107,7 +107,7 @@ public class RestApiImpl extends MLog implements RestApi {
                 ServiceReference<RestNodeService> reference, RestNodeService service) {
 
             if (service != null) {
-                
+
                 String nodeId = service.getNodeName();
                 for (String x : service.getParentNodeCanonicalClassNames()) {
                     if (x != null) {
@@ -116,7 +116,8 @@ public class RestApiImpl extends MLog implements RestApi {
                         register.getRegistry().remove(key);
                     }
                 }
-                sockets.getClone(nodeId).forEach(v -> v.close(HttpServletResponse.SC_RESET_CONTENT, null));
+                sockets.getClone(nodeId)
+                        .forEach(v -> v.close(HttpServletResponse.SC_RESET_CONTENT, null));
                 sockets.remove(nodeId);
             }
         }
@@ -135,18 +136,18 @@ public class RestApiImpl extends MLog implements RestApi {
 
     @Override
     public String getNodeId(Node node) {
-        //return node instanceof RestNodeService ? ((RestNodeService)node).getNodeId() : node.getClass().getCanonicalName();
+        // return node instanceof RestNodeService ? ((RestNodeService)node).getNodeId() :
+        // node.getClass().getCanonicalName();
         return node.getClass().getCanonicalName();
     }
-    
+
     @Override
     public Node getNode(String ident) {
-//        String suffix = "-" + ident;
-//        for (Entry<String, RestNodeService> entry : register.getRegistry().entrySet())
-//            if (entry.getKey().endsWith(suffix)) return entry.getValue();
+        //        String suffix = "-" + ident;
+        //        for (Entry<String, RestNodeService> entry : register.getRegistry().entrySet())
+        //            if (entry.getKey().endsWith(suffix)) return entry.getValue();
         for (RestNodeService entry : register.getRegistry().values())
-            if (entry.getClass().getCanonicalName().equals(ident))
-                return entry;
+            if (entry.getClass().getCanonicalName().equals(ident)) return entry;
         return null;
     }
 
@@ -165,7 +166,7 @@ public class RestApiImpl extends MLog implements RestApi {
             sockets.putEntry(nodeId, socket);
         }
     }
-    
+
     @Override
     public void forEachSocket(Node node, Consumer<RestSocket> f) {
         String nodeId = getNodeId(node);
@@ -173,12 +174,12 @@ public class RestApiImpl extends MLog implements RestApi {
         synchronized (sockets) {
             list = sockets.getClone(nodeId);
         }
-        list.forEach(v -> {
-                if (!v.isClosed())
-                    f.accept(v);
-//                    v.getSubject().execute(() -> f.accept(v) ); // not needed should be done by caller if recommended
-                }
-            );
+        list.forEach(
+                v -> {
+                    if (!v.isClosed()) f.accept(v);
+                    //                    v.getSubject().execute(() -> f.accept(v) ); // not needed
+                    // should be done by caller if recommended
+                });
     }
 
     @Override
@@ -192,5 +193,4 @@ public class RestApiImpl extends MLog implements RestApi {
         if (list == null) return 0;
         return list.size();
     }
-
 }

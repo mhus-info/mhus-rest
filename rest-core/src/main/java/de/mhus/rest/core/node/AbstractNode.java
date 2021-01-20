@@ -210,20 +210,17 @@ public abstract class AbstractNode extends MLog implements RestNodeService {
     public static <T> T getObjectFromContext(CallContext callContext, String clazz) {
         return (T) callContext.get(clazz + OBJECT);
     }
-    
+
     @Override
     public boolean streamingAccept(RestSocket socket) {
         return false;
     }
 
     @Override
-    public void streamingText(RestSocket socket, String message) {
-        
-    }
+    public void streamingText(RestSocket socket, String message) {}
 
     @Override
     public void streamingBinary(RestSocket socket, byte[] payload, int offset, int len) {
         streamingText(socket, new String(payload, offset, len, MString.CHARSET_CHARSET_UTF_8));
     }
-
 }

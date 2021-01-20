@@ -40,7 +40,6 @@ public interface RestApi {
     void forEachSocket(Node node, Consumer<RestSocket> f);
 
     List<String> getSocketIds();
-    
+
     int getSocketCount(String nodeId);
-    
 }

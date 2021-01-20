@@ -25,7 +25,7 @@ import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.node.SingleObjectNode;
 
 @ServiceComponent(service = RestNodeService.class)
-@RestNode(parentNode = PublicRestNode.class, name="uid")
+@RestNode(parentNode = PublicRestNode.class, name = "uid")
 public class UserInformationRestNode extends SingleObjectNode<UserInformation> {
 
     //	@Override

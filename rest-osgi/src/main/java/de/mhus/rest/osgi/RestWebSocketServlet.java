@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2020 Mike Hummel (mh@mhus.de)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.mhus.rest.osgi;
 
 import java.io.IOException;
@@ -50,20 +65,20 @@ import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
 
 /*
- * Activate: blue-create de.mhus.rest.osgi.RestWebSocketServlet
- * Test: 
- * curl --include \
-     --no-buffer \
-     --header "Connection: Upgrade" \
-     --header "Upgrade: websocket" \
-     --header "Host: localhost:8181" \
-     --header "Origin: http://localhost:8181/example-websocket" \
-     --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
-     --header "Sec-WebSocket-Version: 13" \
-     http://localhost:8181/restsocket
- * 
- * websocat ws://localhost:8181/restsocket
- */
+* Activate: blue-create de.mhus.rest.osgi.RestWebSocketServlet
+* Test:
+* curl --include \
+    --no-buffer \
+    --header "Connection: Upgrade" \
+    --header "Upgrade: websocket" \
+    --header "Host: localhost:8181" \
+    --header "Origin: http://localhost:8181/example-websocket" \
+    --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
+    --header "Sec-WebSocket-Version: 13" \
+    http://localhost:8181/restsocket
+*
+* websocat ws://localhost:8181/restsocket
+*/
 @ServiceComponent(
         name = "RestWebSocketServlet",
         service = Servlet.class,
@@ -77,7 +92,8 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
     private CfgString CFG_TRACE_ACTIVE = new CfgString(getClass(), "traceActivation", "");
-    private CfgLong CFG_IDLE_TIMEOUT = new CfgLong(getClass(), "idleTimeout", MPeriod.HOUR_IN_MILLISECOUNDS);
+    private CfgLong CFG_IDLE_TIMEOUT =
+            new CfgLong(getClass(), "idleTimeout", MPeriod.HOUR_IN_MILLISECOUNDS);
     private Set<RestWebSocket> sessions = Collections.synchronizedSet(new HashSet<>());
     private Log log = Log.getLog(this);
     private int nextId = 0;
@@ -98,30 +114,29 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
     @Override
     public void configure(WebSocketServletFactory factory) {
-        factory.setCreator(new WebSocketCreator() {
-            @Override
-            public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
-                return new RestWebSocket(RestWebSocketServlet.this);
-            }
-        });
+        factory.setCreator(
+                new WebSocketCreator() {
+                    @Override
+                    public Object createWebSocket(
+                            ServletUpgradeRequest req, ServletUpgradeResponse resp) {
+                        return new RestWebSocket(RestWebSocketServlet.this);
+                    }
+                });
     }
 
     public void onWebSocketConnect(RestWebSocket socket, Session session) {
-        
+
         try {
-            
+
             session.setIdleTimeout(CFG_IDLE_TIMEOUT.value());
-            
+
             UpgradeRequest request = session.getUpgradeRequest();
             final String path = preparePath(request.getRequestURI().getPath());
 
             SpanContext parentSpanCtx =
                     ITracer.get()
                             .tracer()
-                            .extract(
-                                    Format.Builtin.HTTP_HEADERS,
-                                    new SocketTraceMap(request)
-                                    );
+                            .extract(Format.Builtin.HTTP_HEADERS, new SocketTraceMap(request));
 
             List<String> traceList = request.getParameterMap().get("_trace");
             String trace = traceList == null || traceList.size() < 1 ? null : traceList.get(0);
@@ -142,7 +157,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
             if (path == null || path.length() < 1) {
                 session.getUpgradeResponse().setStatusCode(HttpServletResponse.SC_NOT_FOUND);
-                session.close(HttpServletResponse.SC_NOT_FOUND,"not found");
+                session.close(HttpServletResponse.SC_NOT_FOUND, "not found");
                 session.setIdleTimeout(1000);
                 return;
             }
@@ -158,7 +173,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
             // create shiro Subject and execute
             Subject subject = M.l(AccessApi.class).createSubject();
             socket.subject = subject;
-            
+
             if (token != null) {
                 try {
                     subject.login(token);
@@ -177,10 +192,9 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
         } finally {
             if (!sessions.contains(socket))
-                socket.close(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,null);
+                socket.close(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null);
             if (socket.scope != null) socket.scope.close();
         }
-
     }
 
     private String preparePath(String path) {
@@ -200,10 +214,9 @@ public class RestWebSocketServlet extends WebSocketServlet {
         if (socket == null) return;
         sessions.remove(socket);
         synchronized (socket) {
-            if (socket.isClosed())
-                return;
+            if (socket.isClosed()) return;
             try {
-                socket.session.getRemote().sendString("{_action:\"close\",_rc:"+rc+"}\n");
+                socket.session.getRemote().sendString("{_action:\"close\",_rc:" + rc + "}\n");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -241,7 +254,10 @@ public class RestWebSocketServlet extends WebSocketServlet {
         // create call context object
         CallContext callContext =
                 new CallContext(
-                        CachedRestRequest.transformFromLists(request.getParameterMap(), request.getHeaders(), null), MHttp.METHOD.GET, context);
+                        CachedRestRequest.transformFromLists(
+                                request.getParameterMap(), request.getHeaders(), null),
+                        MHttp.METHOD.GET,
+                        context);
 
         socket.context = callContext;
         RestApi restService = getRestService();
@@ -257,7 +273,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
             socket.node = restService.getNodeId(item);
             sessions.add(socket);
             getRestService().register(socket);
-            
+
             // log access
             logAccess(
                     id,
@@ -275,11 +291,15 @@ public class RestWebSocketServlet extends WebSocketServlet {
             onError(socket, t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, true);
             return;
         }
-        
+
         return;
     }
 
-    private void logAccess(long id, InetSocketAddress remoteAddress, Subject subject, URI requestURI,
+    private void logAccess(
+            long id,
+            InetSocketAddress remoteAddress,
+            Subject subject,
+            URI requestURI,
             Map<String, List<String>> parameterMap) {
         String paramLog = getParameterLog(parameterMap);
         log.d(
@@ -323,21 +343,17 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
     private void onError(RestWebSocket socket, Throwable e, int rc, String msg, boolean close) {
         if (msg == null) {
-            if (e != null)
-                msg = e.toString();
-            else
-                msg = MHttp.HTTP_STATUS_CODES.getOrDefault(rc, "unknown");
+            if (e != null) msg = e.toString();
+            else msg = MHttp.HTTP_STATUS_CODES.getOrDefault(rc, "unknown");
         }
-        if (close)
-            close(socket, rc, msg);
+        if (close) close(socket, rc, msg);
     }
 
     public void onWebSocketError(RestWebSocket socket, Throwable cause) {
-        log.d("error",socket,cause);
+        log.d("error", socket, cause);
         synchronized (socket) {
             sessions.remove(socket);
-            if (socket.isClosed())
-                return;
+            if (socket.isClosed()) return;
             try {
                 socket.session.disconnect(); // or close() ???
             } catch (IOException e) {
@@ -348,21 +364,21 @@ public class RestWebSocketServlet extends WebSocketServlet {
     }
 
     public void onWebSocketText(RestWebSocket socket, String message) {
-        log.t("text",socket,message);
+        log.t("text", socket, message);
         synchronized (socket) {
             if (socket.isClosed()) return;
         }
         Node node = getRestService().getNode(socket.node);
-        socket.subject.execute(() -> node.streamingText(socket, message) );
+        socket.subject.execute(() -> node.streamingText(socket, message));
     }
 
     public void onWebSocketBinary(RestWebSocket socket, byte[] payload, int offset, int len) {
-        log.d("binary",socket,len);
+        log.d("binary", socket, len);
         synchronized (socket) {
             if (socket.isClosed()) return;
         }
         Node node = getRestService().getNode(socket.node);
-        socket.subject.execute(() -> node.streamingBinary(socket, payload, offset, len) );
+        socket.subject.execute(() -> node.streamingBinary(socket, payload, offset, len));
     }
 
     public void onWebSocketClose(RestWebSocket socket, int statusCode, String reason) {
@@ -372,11 +388,11 @@ public class RestWebSocketServlet extends WebSocketServlet {
             getRestService().unregister(socket);
         }
     }
-    
+
     public LinkedList<RestAuthenticator> getAuthenticators() {
         return authenticators;
     }
-    
+
     private synchronized long newId() {
         return nextId++;
     }
@@ -384,5 +400,4 @@ public class RestWebSocketServlet extends WebSocketServlet {
     public boolean isPublicPath(String path) {
         return path.startsWith(PUBLIC_PATH_START) || path.equals(PUBLIC_PATH);
     }
-
 }
