@@ -40,8 +40,7 @@ public class CmdRestList extends AbstractCmd {
 
         HashMap<RestNodeService, LinkedList<String>> list =
                 new HashMap<RestNodeService, LinkedList<String>>();
-        for (Entry<String, RestNodeService> entry :
-                restService.getRestNodeRegistry().entrySet()) {
+        for (Entry<String, RestNodeService> entry : restService.getRestNodeRegistry().entrySet()) {
             LinkedList<String> item = list.get(entry.getValue());
             if (item == null) {
                 item = new LinkedList<String>();
@@ -65,7 +64,7 @@ public class CmdRestList extends AbstractCmd {
                     entry.getValue());
         }
         table.print();
-    
+
         return null;
     }
 }
