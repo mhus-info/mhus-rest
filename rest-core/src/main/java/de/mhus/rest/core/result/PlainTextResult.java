@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 
 import de.mhus.lib.core.MString;
 import de.mhus.lib.core.io.http.MHttp;
+import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.RestResult;
 
 public class PlainTextResult implements RestResult {
@@ -33,12 +34,12 @@ public class PlainTextResult implements RestResult {
     }
 
     @Override
-    public void write(PrintWriter writer) throws Exception {
+    public void write(CallContext context, PrintWriter writer) throws Exception {
         writer.write(text);
     }
 
     @Override
-    public String getContentType() {
+    public String getContentType(CallContext context) {
         return contentType;
     }
 }

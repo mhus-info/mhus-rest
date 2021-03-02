@@ -20,11 +20,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import de.mhus.lib.core.IProperties;
 import de.mhus.lib.core.M;
 import de.mhus.lib.core.MCast;
 import de.mhus.lib.core.MProperties;
 import de.mhus.lib.core.io.http.MHttp;
+import de.mhus.lib.errors.NotSupportedException;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 
@@ -36,11 +39,14 @@ public class CallContext {
     private MHttp.METHOD method;
     private IProperties context;
     private RestAuthorisation authorisation;
+    private Object orgRequest;
+    private Object orgResponse;
 
-    public CallContext(RestRequest req, MHttp.METHOD method, IProperties context) {
+    public CallContext(Object orgRequest, Object orgResponse, RestRequest req, MHttp.METHOD method) {
+        this.orgRequest = orgRequest;
+        this.orgResponse = orgResponse;
         this.req = req;
         this.method = method;
-        this.context = context;
     }
 
     public boolean hasAction() {
@@ -89,6 +95,10 @@ public class CallContext {
     }
 
     public Object get(String key) {
+        synchronized (this) {
+            if (context == null)
+                return null;
+        }
         return context.get(key);
     }
 
@@ -97,10 +107,18 @@ public class CallContext {
     }
 
     public void put(String key, Object value) {
+        synchronized (this) {
+            if (context == null)
+                context = new MProperties();
+        }
         context.put(key, value);
     }
 
     public String[] getNames() {
+        synchronized (this) {
+            if (context == null)
+                return new String[0];
+        }
         return context.keySet().toArray(new String[0]);
     }
 
@@ -128,4 +146,53 @@ public class CallContext {
     public InputStream getLoadContent() {
         return req.getLoadContent();
     }
+    
+    public void setResponseEncoding(String charset) {
+        if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
+            throw new NotSupportedException("response is not HttpServletResponse");
+        ((HttpServletResponse)orgResponse).setCharacterEncoding(charset);
+    }
+    
+    public void setResponseHeader(String name, String value) {
+        if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
+            throw new NotSupportedException("response is not HttpServletResponse");
+        if (value == null) return;
+        ((HttpServletResponse)orgResponse).setHeader(name, value);
+    }
+    
+    public void setResponseHeader(String name, int value) {
+        if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
+            throw new NotSupportedException("response is not HttpServletResponse");
+        ((HttpServletResponse)orgResponse).setIntHeader(name, value);
+    }
+    
+    public void setResponseHeader(String name, Date value) {
+        if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
+            throw new NotSupportedException("response is not HttpServletResponse");
+        if (value == null) return;
+        ((HttpServletResponse)orgResponse).setDateHeader(name, value.getTime());
+    }
+    
+    /**
+     * The original request depends on the underlying technology. It could be a HttpServletRequest for
+     * Servlets or a jetty UpgradeRequest for WebSocket calls. Sometimes it's needed to interact with the original
+     * call objects.
+     * 
+     * @return The original request
+     */
+    public Object getOriginalRequest() {
+        return orgRequest;
+    }
+    
+    /**
+     * The original request depends on the underlying technology. It could be a HttpServletResponse for
+     * Servlets or a jetty Session for WebSocket calls. Sometimes it's needed to interact with the original
+     * call objects.
+     * 
+     * @return The original response
+     */
+    public Object getOriginalResponse() {
+        return orgResponse;
+    }
+    
 }

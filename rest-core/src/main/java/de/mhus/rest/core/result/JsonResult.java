@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.RestResult;
 
 public class JsonResult implements RestResult {
@@ -41,7 +42,7 @@ public class JsonResult implements RestResult {
     }
 
     @Override
-    public void write(PrintWriter writer) throws Exception {
+    public void write(CallContext context, PrintWriter writer) throws Exception {
 
         // log.d("result",id,json);
         if (json == null) {
@@ -60,7 +61,7 @@ public class JsonResult implements RestResult {
     }
 
     @Override
-    public String getContentType() {
+    public String getContentType(CallContext context) {
         return "application/json";
     }
 
@@ -86,7 +87,7 @@ public class JsonResult implements RestResult {
         StringWriter w = new StringWriter();
         PrintWriter p = new PrintWriter(w);
         try {
-            write(p);
+            write(null, p);
         } catch (Exception e) {
         }
         p.flush();

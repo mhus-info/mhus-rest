@@ -39,7 +39,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.lib.core.M;
-import de.mhus.lib.core.MProperties;
 import de.mhus.lib.core.MString;
 import de.mhus.lib.core.cfg.CfgString;
 import de.mhus.lib.core.io.http.MHttp;
@@ -102,6 +101,8 @@ public class RestServlet extends HttpServlet {
             throws ServletException, IOException {
         // System.out.println(">>> " + req.getPathInfo());
         response.setHeader("Access-Control-Allow-Origin", "*");
+
+        response.setCharacterEncoding(MString.CHARSET_UTF_8); // default
 
         Scope scope = null;
         try {
@@ -180,8 +181,6 @@ public class RestServlet extends HttpServlet {
         if (parts.size() == 0) return null;
         parts.remove(0); // [empty]
         //      parts.remove(0); // rest
-        // context
-        MProperties context = new MProperties();
 
         // authenticate - login
         if (authToken != null) {
@@ -200,6 +199,8 @@ public class RestServlet extends HttpServlet {
         // create call context object
         CallContext callContext =
                 new CallContext(
+                        req,
+                        resp,
                         new CachedRestRequest(
                                 req.getParameterMap(),
                                 null,
@@ -215,8 +216,8 @@ public class RestServlet extends HttpServlet {
                                         }
                                     }
                                 }),
-                        MHttp.toMethod(method),
-                        context);
+                        MHttp.toMethod(method)
+                        );
 
         RestApi restService = getRestService();
 
@@ -276,8 +277,8 @@ public class RestServlet extends HttpServlet {
                 if (res != null) {
                     resp.setHeader("Encapsulated", "result");
                     log.d("result", id, res);
-                    resp.setContentType(res.getContentType());
-                    res.write(resp.getWriter());
+                    resp.setContentType(res.getContentType(callContext));
+                    res.write(callContext, resp.getWriter());
                 }
             } catch (Throwable t) {
                 log.d(t);

@@ -44,7 +44,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.lib.core.M;
 import de.mhus.lib.core.MPeriod;
-import de.mhus.lib.core.MProperties;
 import de.mhus.lib.core.MString;
 import de.mhus.lib.core.cfg.CfgLong;
 import de.mhus.lib.core.cfg.CfgString;
@@ -248,16 +247,16 @@ public class RestWebSocketServlet extends WebSocketServlet {
         }
         parts.remove(0); // [empty]
         //      parts.remove(0); // rest
-        // context
-        MProperties context = new MProperties();
 
         // create call context object
         CallContext callContext =
                 new CallContext(
+                        request,
+                        session,
                         CachedRestRequest.transformFromLists(
                                 request.getParameterMap(), request.getHeaders(), null),
-                        MHttp.METHOD.GET,
-                        context);
+                        MHttp.METHOD.GET
+                        );
 
         socket.context = callContext;
         RestApi restService = getRestService();

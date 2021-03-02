@@ -24,6 +24,7 @@ import de.mhus.lib.core.MString;
 import de.mhus.lib.core.io.http.MHttp;
 import de.mhus.lib.core.pojo.MPojo;
 import de.mhus.lib.core.pojo.PojoModelFactory;
+import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.RestResult;
 
 public class PojoResult implements RestResult {
@@ -38,7 +39,7 @@ public class PojoResult implements RestResult {
     }
 
     @Override
-    public void write(PrintWriter writer) throws Exception {
+    public void write(CallContext context, PrintWriter writer) throws Exception {
         if (obj == null) return;
         JsonResult json = new JsonResult();
         PojoModelFactory factory = MPojo.getDefaultModelFactory();
@@ -64,11 +65,11 @@ public class PojoResult implements RestResult {
             ObjectNode jObj = json.createObjectNode();
             MPojo.pojoToJson(obj, jObj, factory);
         }
-        json.write(writer);
+        json.write(context, writer);
     }
 
     @Override
-    public String getContentType() {
+    public String getContentType(CallContext context) {
         return contentType;
     }
 }

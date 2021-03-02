@@ -17,9 +17,11 @@ package de.mhus.rest.core.api;
 
 import java.io.PrintWriter;
 
+import de.mhus.rest.core.CallContext;
+
 public interface RestResult {
 
-    public void write(PrintWriter writer) throws Exception;
+    public void write(CallContext context, PrintWriter writer) throws Exception;
 
-    public String getContentType();
+    public String getContentType(CallContext context);
 }

@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 
 import de.mhus.lib.core.MFile;
+import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.RestResult;
 
 public class BinaryResult implements RestResult {
@@ -39,7 +40,7 @@ public class BinaryResult implements RestResult {
     }
 
     @Override
-    public void write(PrintWriter writer) throws Exception {
+    public void write(CallContext context, PrintWriter writer) throws Exception {
         if (is != null) {
             while (true) {
                 int b = is.read();
@@ -59,7 +60,7 @@ public class BinaryResult implements RestResult {
     protected void onClose() {}
 
     @Override
-    public String getContentType() {
+    public String getContentType(CallContext context) {
         return contentType;
     }
 }
