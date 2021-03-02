@@ -19,8 +19,8 @@ import org.apache.shiro.subject.Subject;
 
 import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.lib.core.MPeriod;
-import de.mhus.lib.core.shiro.AccessUtil;
-import de.mhus.lib.core.shiro.BearerConfiguration;
+import de.mhus.lib.core.aaa.Aaa;
+import de.mhus.lib.core.aaa.BearerConfiguration;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.annotation.RestNode;
 import de.mhus.rest.core.api.Node;
@@ -36,12 +36,12 @@ public class JwtTokenNode extends VoidNode {
 
     @Override
     protected void doCreate(JsonResult result, CallContext callContext) throws Exception {
-        Subject subject = AccessUtil.getSubject();
+        Subject subject = Aaa.getSubject();
         if (subject == null || !subject.isAuthenticated()) {
             result.createObjectNode().put("rc", -1);
             return;
         }
-        String token = AccessUtil.createBearerToken(subject, null, config);
+        String token = Aaa.createBearerToken(subject, null, config);
         if (token == null) {
             result.createObjectNode().put("rc", -2);
             return;

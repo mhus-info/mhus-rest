@@ -26,8 +26,8 @@ import org.apache.shiro.authz.permission.WildcardPermission;
 import org.apache.shiro.subject.Subject;
 
 import de.mhus.lib.core.MLog;
+import de.mhus.lib.core.aaa.Aaa;
 import de.mhus.lib.core.cfg.CfgBoolean;
-import de.mhus.lib.core.shiro.AccessUtil;
 import de.mhus.lib.errors.AccessDeniedException;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
@@ -60,8 +60,8 @@ public class RestRegistry extends MLog {
         if (context.getAuthorisation() == null) {
             Subject subject = SecurityUtils.getSubject();
             try {
-                if (AccessUtil.isAnnotated(next.getClass()))
-                    AccessUtil.checkPermission(next.getClass());
+                if (Aaa.isAnnotated(next.getClass()))
+                    Aaa.checkPermission(next.getClass());
                 else // default access check
                 subject.checkPermission(new WildcardPermission("rest.node:execute:" + name));
                 log().d("access granted", subject, "rest.node", name, "execute");
