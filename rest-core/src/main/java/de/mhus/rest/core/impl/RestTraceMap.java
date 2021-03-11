@@ -13,49 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.osgi;
+package de.mhus.rest.core.impl;
 
+import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 
-import org.eclipse.jetty.websocket.api.UpgradeRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import io.opentracing.propagation.TextMap;
 
-public class SocketTraceMap implements TextMap {
+public class RestTraceMap implements TextMap {
 
-    private UpgradeRequest request;
+    private HttpServletRequest request;
 
-    public SocketTraceMap(UpgradeRequest request) {
+    public RestTraceMap(HttpServletRequest request) {
         this.request = request;
     }
 
     @Override
     public Iterator<Entry<String, String>> iterator() {
-        final Iterator<Entry<String, List<String>>> iter =
-                request.getHeaders().entrySet().iterator();
+        final Enumeration<String> enu = request.getHeaderNames();
         return new Iterator<Entry<String, String>>() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return enu.hasMoreElements();
             }
 
             @Override
             public Entry<String, String> next() {
-
-                final Entry<String, List<String>> entry = iter.next();
+                final String key = enu.nextElement();
                 return new Entry<String, String>() {
 
                     @Override
                     public String getKey() {
-                        return entry.getKey();
+                        return key;
                     }
 
                     @Override
                     public String getValue() {
-                        if (entry.getValue().size() < 1) return null;
-                        return entry.getValue().get(0);
+                        return request.getHeader(key);
                     }
 
                     @Override

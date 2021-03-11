@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.osgi;
+package de.mhus.rest.core.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.jetty.websocket.api.UpgradeRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import de.mhus.rest.core.RestRequest;
 
-public class SocketRequestWrapper implements RestRequest {
+public class RestRequestWrapper implements RestRequest {
 
-    private UpgradeRequest request;
+    private HttpServletRequest request;
 
-    public SocketRequestWrapper(UpgradeRequest request) {
+    public RestRequestWrapper(HttpServletRequest request) {
         this.request = request;
     }
 
@@ -39,20 +40,23 @@ public class SocketRequestWrapper implements RestRequest {
 
     @Override
     public String getParameter(String name) {
-        Map<String, List<String>> map = request.getParameterMap();
-        if (map == null) return null;
-        List<String> value = map.get(name);
-        if (value == null || value.size() < 1) return null;
-        return value.get(0);
+        return request.getParameter(name);
     }
 
     @Override
     public Set<String> getParameterNames() {
-        return request.getParameterMap().keySet();
+        HashSet<String> out = new HashSet<>();
+        Enumeration<String> enu = request.getParameterNames();
+        while (enu.hasMoreElements()) out.add(enu.nextElement());
+        return out;
     }
 
     @Override
     public InputStream getLoadContent() {
-        return null;
+        try {
+            return request.getInputStream();
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

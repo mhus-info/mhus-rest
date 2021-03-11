@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mhus.rest.osgi.nodes;
+package de.mhus.rest.core.nodes;
 
 import java.util.List;
 

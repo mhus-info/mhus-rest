@@ -15,11 +15,6 @@
  */
 package de.mhus.rest.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.framework.BundleContext;
@@ -31,25 +26,20 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import de.mhus.lib.core.MLog;
-import de.mhus.lib.core.cfg.CfgBoolean;
 import de.mhus.lib.core.util.WeakMapList;
-import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestRegistry;
 import de.mhus.rest.core.RestSocket;
-import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
+import de.mhus.rest.core.impl.AbstractRestApi;
 
-@Component(immediate = true)
-public class RestApiImpl extends MLog implements RestApi {
+@Component(immediate = true,service = RestApi.class )
+public class RestApiImpl extends AbstractRestApi {
 
     private BundleContext context;
     private ServiceTracker<RestNodeService, RestNodeService> nodeTracker;
     private RestRegistry register = new RestRegistry();
     private WeakMapList<String, RestSocket> sockets = new WeakMapList<>();
-
-    public static final CfgBoolean RELAXED = new CfgBoolean(RestApi.class, "aaaRelaxed", true);
 
     @Activate
     public void doActivate(ComponentContext ctx) {
@@ -123,74 +113,4 @@ public class RestApiImpl extends MLog implements RestApi {
         }
     }
 
-    @Override
-    public Map<String, RestNodeService> getRestNodeRegistry() {
-        return register.getRegistry();
-    }
-
-    @Override
-    public Node lookup(List<String> parts, Class<? extends Node> lastNode, CallContext context)
-            throws Exception {
-        return register.lookup(parts, lastNode, context);
-    }
-
-    @Override
-    public String getNodeId(Node node) {
-        // return node instanceof RestNodeService ? ((RestNodeService)node).getNodeId() :
-        // node.getClass().getCanonicalName();
-        return node.getClass().getCanonicalName();
-    }
-
-    @Override
-    public Node getNode(String ident) {
-        //        String suffix = "-" + ident;
-        //        for (Entry<String, RestNodeService> entry : register.getRegistry().entrySet())
-        //            if (entry.getKey().endsWith(suffix)) return entry.getValue();
-        for (RestNodeService entry : register.getRegistry().values())
-            if (entry.getClass().getCanonicalName().equals(ident)) return entry;
-        return null;
-    }
-
-    @Override
-    public void unregister(RestSocket socket) {
-        String nodeId = socket.getNodeId();
-        synchronized (sockets) {
-            sockets.removeEntry(nodeId, socket);
-        }
-    }
-
-    @Override
-    public void register(RestSocket socket) {
-        String nodeId = socket.getNodeId();
-        synchronized (sockets) {
-            sockets.putEntry(nodeId, socket);
-        }
-    }
-
-    @Override
-    public void forEachSocket(Node node, Consumer<RestSocket> f) {
-        String nodeId = getNodeId(node);
-        List<RestSocket> list = null;
-        synchronized (sockets) {
-            list = sockets.getClone(nodeId);
-        }
-        list.forEach(
-                v -> {
-                    if (!v.isClosed()) f.accept(v);
-                    //                    v.getSubject().execute(() -> f.accept(v) ); // not needed
-                    // should be done by caller if recommended
-                });
-    }
-
-    @Override
-    public List<String> getSocketIds() {
-        return new ArrayList<>(sockets.keySet());
-    }
-
-    @Override
-    public int getSocketCount(String nodeId) {
-        List<RestSocket> list = sockets.get(nodeId);
-        if (list == null) return 0;
-        return list.size();
-    }
 }
