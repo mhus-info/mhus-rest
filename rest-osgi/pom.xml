@@ -43,11 +43,11 @@
 						</Export-Package>
 						<Import-Package>
 						  org.newsclub.net.unix;resolution:=optional,
+						  jdk.internal.*;resolution:=optional,
 						  *
 						</Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
 						<Service-Component>de.mhus.rest.osgi.*</Service-Component>
-						<Embed-Dependency>rest-core</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>
