@@ -26,6 +26,7 @@ public class PlainTextResult implements RestResult {
 
     private String contentType;
     private String text;
+    private int returnCode = 0;
 
     public PlainTextResult(String text, String contentType) {
         if (MString.isEmpty(contentType)) contentType = MHttp.CONTENT_TYPE_TEXT;
@@ -42,4 +43,12 @@ public class PlainTextResult implements RestResult {
     public String getContentType(CallContext context) {
         return contentType;
     }
+
+	public int getReturnCode() {
+		return returnCode;
+	}
+
+	public void setReturnCode(int returnCode) {
+		this.returnCode = returnCode;
+	}
 }

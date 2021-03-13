@@ -31,6 +31,7 @@ public class PojoResult implements RestResult {
 
     private String contentType;
     private Object obj;
+    private int returnCode = 0;
 
     public PojoResult(Object obj, String contentType) {
         if (MString.isEmpty(contentType)) contentType = MHttp.CONTENT_TYPE_JSON;
@@ -72,4 +73,12 @@ public class PojoResult implements RestResult {
     public String getContentType(CallContext context) {
         return contentType;
     }
+
+	public int getReturnCode() {
+		return returnCode;
+	}
+
+	public void setReturnCode(int returnCode) {
+		this.returnCode = returnCode;
+	}
 }

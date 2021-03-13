@@ -39,7 +39,7 @@ public class RestResultMapper implements ParameterEntryMapper {
             if (result == null) return "null";
             StringBuilder sb = new StringBuilder();
 
-            sb.append("=== REST Result === ").append(result.getContentType(null)).append("\n");
+            sb.append("=== REST Result === ").append(result.getReturnCode()).append(" ").append(result.getContentType(null)).append("\n");
 
             if (result instanceof JsonResult) {
                 JsonResult r = (JsonResult) result;

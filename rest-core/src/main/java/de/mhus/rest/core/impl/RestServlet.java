@@ -275,8 +275,11 @@ public class RestServlet extends HttpServlet {
 
             try {
                 if (res != null) {
-                    resp.setHeader("Encapsulated", "result");
+//                    resp.setHeader("Encapsulated", "result");
                     log.d("result", id, res);
+                    int rc = res.getReturnCode();
+                    if (rc < 0)
+                    	resp.setStatus(-rc);
                     resp.setContentType(res.getContentType(callContext));
                     res.write(callContext, resp.getWriter());
                 }

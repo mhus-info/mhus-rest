@@ -28,6 +28,7 @@ public class BinaryResult implements RestResult {
     private InputStream is;
     private String contentType;
     private Reader reader;
+    private int returnCode = 0;
 
     public BinaryResult(InputStream is, String contentType) {
         this.contentType = contentType;
@@ -63,4 +64,12 @@ public class BinaryResult implements RestResult {
     public String getContentType(CallContext context) {
         return contentType;
     }
+
+	public int getReturnCode() {
+		return returnCode;
+	}
+
+	public void setReturnCode(int returnCode) {
+		this.returnCode = returnCode;
+	}
 }

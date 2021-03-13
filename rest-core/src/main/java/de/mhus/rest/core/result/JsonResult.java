@@ -36,6 +36,7 @@ public class JsonResult implements RestResult {
     private JsonNode json;
     private long id;
     private static ObjectMapper m = new ObjectMapper();
+    private int returnCode = 0;
 
     public JsonResult() {
         id = newId();
@@ -98,4 +99,13 @@ public class JsonResult implements RestResult {
         json = m.createArrayNode();
         return (ArrayNode) json;
     }
+
+	public int getReturnCode() {
+		return returnCode;
+	}
+
+	public void setReturnCode(int returnCode) {
+		this.returnCode = returnCode;
+	}
+
 }
