@@ -41,7 +41,8 @@
 							de.mhus.rest.karaf.*;version=${project.version}
 						</Export-Package>
 						<Import-Package>
-						  *
+		                    jdk.internal.*;resolution:=optional,
+		                    *
 						</Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
 						<Service-Component>de.mhus.rest.karaf.*</Service-Component>
