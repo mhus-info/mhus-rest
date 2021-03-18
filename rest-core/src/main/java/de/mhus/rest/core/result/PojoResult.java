@@ -74,7 +74,8 @@ public class PojoResult implements RestResult {
         return contentType;
     }
 
-	public int getReturnCode() {
+	@Override
+    public int getReturnCode() {
 		return returnCode;
 	}
 

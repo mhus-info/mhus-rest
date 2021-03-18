@@ -100,7 +100,8 @@ public class JsonResult implements RestResult {
         return (ArrayNode) json;
     }
 
-	public int getReturnCode() {
+	@Override
+    public int getReturnCode() {
 		return returnCode;
 	}
 
