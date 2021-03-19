@@ -30,7 +30,7 @@ import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
 
-public class AbstractRestApi extends MLog implements RestApi {
+public abstract class AbstractRestApi extends MLog implements RestApi {
 
     protected RestRegistry register = new RestRegistry();
     protected WeakMapList<String, RestSocket> sockets = new WeakMapList<>();
@@ -107,4 +107,5 @@ public class AbstractRestApi extends MLog implements RestApi {
         if (list == null) return 0;
         return list.size();
     }
+
 }

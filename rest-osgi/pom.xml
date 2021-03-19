@@ -144,6 +144,11 @@
             <version>${jetty.version}</version>
         </dependency>
         
+        <dependency>
+            <groupId>de.mhus.osgi</groupId>
+            <artifactId>osgi-api</artifactId>
+        </dependency>
+        
 	</dependencies>
 
 </project>

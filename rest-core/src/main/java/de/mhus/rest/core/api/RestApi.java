@@ -42,4 +42,6 @@ public interface RestApi {
     List<String> getSocketIds();
 
     int getSocketCount(String nodeId);
+
+    void reset();
 }

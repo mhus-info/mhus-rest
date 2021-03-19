@@ -41,13 +41,9 @@
 	                    de.mhus.rest.core*;version=${project.version}
 	                </Export-Package>
 	                <Import-Package>
-	                    org.newsclub.net.unix*;resolution:=optional,
                         jdk.internal.*;resolution:=optional,
 	                    *
 	                </Import-Package>
-	                <Private-Package>
-	                   net.bytebuddy*
-	                </Private-Package>
 	                <DynamicImport-Package>*</DynamicImport-Package>
 	              </instructions>
 	            </configuration>

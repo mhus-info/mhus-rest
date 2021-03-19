@@ -26,9 +26,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import de.mhus.lib.core.util.WeakMapList;
-import de.mhus.rest.core.RestRegistry;
-import de.mhus.rest.core.RestSocket;
+import de.mhus.osgi.api.MOsgi;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.impl.AbstractRestApi;
@@ -38,8 +36,6 @@ public class RestApiImpl extends AbstractRestApi {
 
     private BundleContext context;
     private ServiceTracker<RestNodeService, RestNodeService> nodeTracker;
-    private RestRegistry register = new RestRegistry();
-    private WeakMapList<String, RestSocket> sockets = new WeakMapList<>();
 
     @Activate
     public void doActivate(ComponentContext ctx) {
@@ -110,6 +106,31 @@ public class RestApiImpl extends AbstractRestApi {
                         .forEach(v -> v.close(HttpServletResponse.SC_RESET_CONTENT, null));
                 sockets.remove(nodeId);
             }
+        }
+    }
+
+    @Override
+    public void reset() {
+        register.getRegistry().clear();
+        for (RestNodeService service : MOsgi.getServices(RestNodeService.class, null)) {
+
+            for (String x : service.getParentNodeCanonicalClassNames()) {
+                if (x != null) {
+                    if (x.length() > 0
+                            && !x.contains(
+                                    ".")) // print a warning - class name without dot should be
+                        // a mistake
+                        log().w(
+                                        "Register RestNode with malformed parent name - should be a class",
+                                        service.getClass(),
+                                        service.getNodeName(),
+                                        x);
+                    String key = x + "-" + service.getNodeName();
+                    log().i("register", key, service.getClass().getCanonicalName());
+                    register.getRegistry().put(key, service);
+                }
+            }
+            
         }
     }
 
