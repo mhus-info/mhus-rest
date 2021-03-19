@@ -44,4 +44,6 @@ public interface RestApi {
     int getSocketCount(String nodeId);
 
     void reset();
+
+    void checkPermission(Node item, String string, CallContext callContext);
 }

@@ -54,31 +54,54 @@ public class RestRegistry extends MLog {
         parts.remove(0);
         String lastNodeId =
                 lastNode == null ? RestNodeService.ROOT_PARENT : lastNode.getCanonicalName();
-        RestNodeService next = register.get(lastNodeId + "-" + name);
+        String ident = lastNodeId + "-" + name;
+        RestNodeService next = register.get(ident);
         if (next == null) return null;
 
+        checkPermission(context, next, ident, "access");
+
+        context.setNodeIdent(ident); // remember last ident
+        return next.lookup(parts, context);
+    }
+    
+    public void checkPermission(CallContext context, String action ) {
+        String ident = context.getNodeIdent();
+        if (ident == null) {
+            log().d("ident is null");
+            throw new AccessDeniedException("access denied (3)");
+        }
+        RestNodeService next = register.get(ident);
+        if (next == null) {
+            log().d("node is null",ident);
+            throw new AccessDeniedException("access denied (4)");
+        }
+        checkPermission(context, next, ident, action);
+    }
+    
+    public void checkPermission(CallContext context, RestNodeService next, String ident, String action ) {
+        
         if (context.getAuthorisation() == null) {
             Subject subject = SecurityUtils.getSubject();
             try {
                 if (Aaa.isAnnotated(next.getClass()))
                     Aaa.checkPermission(next.getClass());
                 else // default access check
-                subject.checkPermission(new WildcardPermission("rest.node:execute:" + name));
-                log().d("access granted", subject, "rest.node", name, "execute");
+                    subject.checkPermission(new WildcardPermission("de.mhus.rest.core.node:"+action+":" + ident));
+                log().d("access granted", subject, "de.mhus.rest.core.node", action, ident);
             } catch (AuthorizationException e) {
-                log().d("access denied", subject, "rest.node", name, "execute");
-                throw new AccessDeniedException("access denied");
+                log().d("access denied", subject, "de.mhus.rest.core.node", action, ident);
+                throw new AccessDeniedException("access denied (1)");
             }
         } else {
             try {
                 Subject subject =
-                        context.getAuthorisation().authorize(this, name, lastNode, context);
-                log().d("access granted", subject, "rest.node", name, "execute");
+                        context.getAuthorisation().authorize(this, ident, action, context);
+                log().d("access granted", subject, "rest.node", ident, action);
             } catch (Throwable t) {
-                log().d("access denied", null, "rest.node", name, "execute");
-                throw new AccessDeniedException("access denied");
+                log().d("access denied", null, "rest.node", ident, action);
+                throw new AccessDeniedException("access denied (2)");
             }
         }
-        return next.lookup(parts, context);
+        
     }
 }

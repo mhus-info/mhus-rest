@@ -27,6 +27,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import de.mhus.osgi.api.MOsgi;
+import de.mhus.rest.core.CallContext;
+import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.impl.AbstractRestApi;
@@ -132,6 +134,11 @@ public class RestApiImpl extends AbstractRestApi {
             }
             
         }
+    }
+
+    @Override
+    public void checkPermission(Node item, String action, CallContext callContext) {
+        register.checkPermission(callContext, action );
     }
 
 }

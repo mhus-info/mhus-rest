@@ -41,6 +41,7 @@ public class CallContext {
     private RestAuthorisation authorisation;
     private Object orgRequest;
     private Object orgResponse;
+    private String nodeIdent;
 
     public CallContext(Object orgRequest, Object orgResponse, RestRequest req, MHttp.METHOD method) {
         this.orgRequest = orgRequest;
@@ -193,6 +194,14 @@ public class CallContext {
      */
     public Object getOriginalResponse() {
         return orgResponse;
+    }
+
+    public String getNodeIdent() {
+        return nodeIdent;
+    }
+
+    public void setNodeIdent(String nodeIdent) {
+        this.nodeIdent = nodeIdent;
     }
     
 }

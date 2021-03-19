@@ -46,6 +46,7 @@ import de.mhus.lib.core.io.http.MHttp;
 import de.mhus.lib.core.logging.ITracer;
 import de.mhus.lib.core.logging.Log;
 import de.mhus.lib.core.util.Provider;
+import de.mhus.lib.errors.AccessDeniedException;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestAuthenticator;
 import de.mhus.rest.core.RestAuthenticatorByBasicAuth;
@@ -254,14 +255,23 @@ public class RestServlet extends HttpServlet {
                     req.getParameterMap());
 
             if (method.equals(MHttp.METHOD_GET)) {
+                restService.checkPermission(item, "read", callContext);
                 res = item.doRead(callContext);
             } else if (method.equals(MHttp.METHOD_POST)) {
 
-                if (callContext.hasAction()) res = item.doAction(callContext);
-                else res = item.doCreate(callContext);
+                if (callContext.hasAction()) {
+                    restService.checkPermission(item, callContext.getAction(), callContext);
+                    res = item.doAction(callContext);
+                }
+                else {
+                    restService.checkPermission(item, "create", callContext);
+                    res = item.doCreate(callContext);
+                }
             } else if (method.equals(MHttp.METHOD_PUT)) {
+                restService.checkPermission(item, "update", callContext);
                 res = item.doUpdate(callContext);
             } else if (method.equals(MHttp.METHOD_DELETE)) {
+                restService.checkPermission(item, "delete", callContext);
                 res = item.doDelete(callContext);
             } else if (method.equals(MHttp.METHOD_TRACE)) {
 
@@ -296,6 +306,10 @@ public class RestServlet extends HttpServlet {
                 return null;
             }
 
+        } catch (AccessDeniedException e) {
+            log.d(e);
+            sendError(id, req, resp, 404, e.getMessage(), e, subject);
+            return null;
         } catch (RestException t) {
             log.d(t);
             sendError(id, req, resp, t.getErrorId(), t.getMessage(), t, subject);
