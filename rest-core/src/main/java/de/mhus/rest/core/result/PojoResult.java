@@ -49,7 +49,7 @@ public class PojoResult implements RestResult {
                 ArrayNode jArray = json.createArrayNode();
                 for (Object aObj : (Object[]) obj) {
                     if (aObj == null) continue; // should not happen
-                    MPojo.addJsonValue(jArray, aObj, factory, true, false, 0);
+                    MPojo.addJsonValue(jArray, aObj, factory, false, true, false);
                 }
             } else {
                 ArrayNode jArray = json.createArrayNode();
@@ -61,7 +61,7 @@ public class PojoResult implements RestResult {
             }
         } else if (obj.getClass().isPrimitive()) {
             ObjectNode jObj = json.createObjectNode();
-            MPojo.setJsonValue(jObj, "value", obj, factory, true, false, 0);
+            MPojo.setJsonValue(jObj, "value", obj, factory, false, true, false);
         } else {
             ObjectNode jObj = json.createObjectNode();
             MPojo.pojoToJson(obj, jObj, factory);
