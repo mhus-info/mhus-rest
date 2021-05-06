@@ -16,19 +16,18 @@
 package de.mhus.rest.core;
 
 import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.UsernamePasswordToken;
+
+import de.mhus.lib.core.MString;
+import de.mhus.lib.core.aaa.Aaa;
 
 public class RestAuthenticatorByTicket implements RestAuthenticator {
 
     @Override
     public AuthenticationToken authenticate(RestRequest req) {
         String ticket = req.getParameter("_ticket");
-        if (ticket == null) return null;
+        if (MString.isEmptyTrim(ticket)) return null;
 
-        String[] parts = ticket.split(":", 2);
-        if (parts.length != 2) return null;
-
-        UsernamePasswordToken token = new UsernamePasswordToken(parts[0], parts[1]);
+        AuthenticationToken token = Aaa.createToken(ticket);
         return token;
     }
 }

@@ -45,6 +45,7 @@ import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.lib.core.M;
 import de.mhus.lib.core.MPeriod;
 import de.mhus.lib.core.MString;
+import de.mhus.lib.core.aaa.Aaa;
 import de.mhus.lib.core.aaa.AccessApi;
 import de.mhus.lib.core.cfg.CfgLong;
 import de.mhus.lib.core.cfg.CfgString;
@@ -175,7 +176,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
             if (token != null) {
                 try {
-                    subject.login(token);
+                    Aaa.login(subject, token);
                 } catch (AuthenticationException e) {
                     onLoginFailure(socket);
                     return;

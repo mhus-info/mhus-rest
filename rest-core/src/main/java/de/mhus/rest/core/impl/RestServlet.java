@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.mhus.lib.annotations.service.ServiceComponent;
 import de.mhus.lib.core.M;
 import de.mhus.lib.core.MString;
+import de.mhus.lib.core.aaa.Aaa;
 import de.mhus.lib.core.aaa.AccessApi;
 import de.mhus.lib.core.cfg.CfgString;
 import de.mhus.lib.core.io.http.MHttp;
@@ -88,9 +89,9 @@ public class RestServlet extends HttpServlet {
     }
 
     protected void doInitialize() {
-        getAuthenticators().add(new RestAuthenticatorByBasicAuth());
         getAuthenticators().add(new RestAuthenticatorByJwt());
         getAuthenticators().add(new RestAuthenticatorByTicket());
+        getAuthenticators().add(new RestAuthenticatorByBasicAuth());
     }
 
     public RestApi getRestService() {
@@ -186,7 +187,7 @@ public class RestServlet extends HttpServlet {
         // authenticate - login
         if (authToken != null) {
             try {
-                subject.login(authToken);
+                Aaa.login(subject, authToken);
             } catch (AuthenticationException e) {
                 return onLoginFailure(authToken, e, req, resp, id);
             }
