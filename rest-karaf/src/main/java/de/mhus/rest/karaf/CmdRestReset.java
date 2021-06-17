@@ -15,19 +15,12 @@
  */
 package de.mhus.rest.karaf;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map.Entry;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 import de.mhus.lib.core.M;
-import de.mhus.lib.core.console.ConsoleTable;
 import de.mhus.osgi.api.karaf.AbstractCmd;
 import de.mhus.rest.core.api.RestApi;
-import de.mhus.rest.core.api.RestNodeService;
-import de.mhus.rest.core.node.AbstractNode;
 
 @Command(scope = "mhus", name = "rest-reset", description = "Reset all rest providers")
 @Service
