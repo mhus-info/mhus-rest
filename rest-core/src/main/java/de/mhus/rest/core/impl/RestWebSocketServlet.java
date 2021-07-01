@@ -256,7 +256,8 @@ public class RestWebSocketServlet extends WebSocketServlet {
                         session,
                         CachedRestRequest.transformFromLists(
                                 request.getParameterMap(), request.getHeaders(), null),
-                        MHttp.METHOD.GET
+                        MHttp.METHOD.GET,
+                        false
                         );
 
         socket.context = callContext;

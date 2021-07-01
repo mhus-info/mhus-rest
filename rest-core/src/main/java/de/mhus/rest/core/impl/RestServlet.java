@@ -86,6 +86,7 @@ public class RestServlet extends HttpServlet {
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
     private CfgString CFG_TRACE_ACTIVE = new CfgString(getClass(), "traceActivation", "");
     private CfgBoolean CFG_TRACE_TAGS = new CfgBoolean(getClass(), "traceTags", true);
+    private CfgBoolean CFG_TRACE_RETURN = new CfgBoolean(getClass(), "traceReturn", true);
 
     public RestServlet() {
         doInitialize();
@@ -236,7 +237,8 @@ public class RestServlet extends HttpServlet {
                                         }
                                     }
                                 }),
-                        MHttp.toMethod(method)
+                        MHttp.toMethod(method),
+                        CFG_TRACE_RETURN.value()
                         );
 
         RestApi restService = getRestService();
@@ -464,7 +466,7 @@ public class RestServlet extends HttpServlet {
             if (user != null) json.put("_user", String.valueOf(user.getPrincipal()));
             json.put("_error", errNr);
             json.put("_errorMessage", errMsg);
-            if (ITracer.get().current() != null)
+            if (CFG_TRACE_RETURN.value() && ITracer.get().current() != null)
                 try {
                     ITracer.get().tracer().inject(ITracer.get().current().context(), Format.Builtin.TEXT_MAP, new TraceJsonMap(json, "_"));
                 } catch (Throwable t2) {

@@ -42,12 +42,14 @@ public class CallContext {
     private Object orgRequest;
     private Object orgResponse;
     private String nodeIdent;
+    private boolean returnTrace;
 
-    public CallContext(Object orgRequest, Object orgResponse, RestRequest req, MHttp.METHOD method) {
+    public CallContext(Object orgRequest, Object orgResponse, RestRequest req, MHttp.METHOD method, boolean returnTrace) {
         this.orgRequest = orgRequest;
         this.orgResponse = orgResponse;
         this.req = req;
         this.method = method;
+        this.returnTrace = returnTrace;
     }
 
     public boolean hasAction() {
@@ -202,6 +204,10 @@ public class CallContext {
 
     public void setNodeIdent(String nodeIdent) {
         this.nodeIdent = nodeIdent;
+    }
+
+    public boolean isReturnTrace() {
+        return returnTrace;
     }
     
 }
