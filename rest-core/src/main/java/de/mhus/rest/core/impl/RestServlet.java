@@ -42,10 +42,12 @@ import de.mhus.lib.core.M;
 import de.mhus.lib.core.MString;
 import de.mhus.lib.core.aaa.Aaa;
 import de.mhus.lib.core.aaa.AccessApi;
+import de.mhus.lib.core.cfg.CfgBoolean;
 import de.mhus.lib.core.cfg.CfgString;
 import de.mhus.lib.core.io.http.MHttp;
 import de.mhus.lib.core.logging.ITracer;
 import de.mhus.lib.core.logging.Log;
+import de.mhus.lib.core.logging.TraceJsonMap;
 import de.mhus.lib.core.util.Provider;
 import de.mhus.lib.errors.AccessDeniedException;
 import de.mhus.rest.core.CallContext;
@@ -83,6 +85,7 @@ public class RestServlet extends HttpServlet {
     private int nextId = 0;
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
     private CfgString CFG_TRACE_ACTIVE = new CfgString(getClass(), "traceActivation", "");
+    private CfgBoolean CFG_TRACE_TAGS = new CfgBoolean(getClass(), "traceTags", true);
 
     public RestServlet() {
         doInitialize();
@@ -115,7 +118,7 @@ public class RestServlet extends HttpServlet {
             SpanContext parentSpanCtx =
                     ITracer.get()
                             .tracer()
-                            .extract(Format.Builtin.HTTP_HEADERS, new RestTraceMap(request));
+                            .extract(Format.Builtin.HTTP_HEADERS, new TraceExtractRest(request));
 
             String trace = request.getParameter("_trace");
             if (MString.isEmpty(trace)) trace = CFG_TRACE_ACTIVE.value();
@@ -137,6 +140,21 @@ public class RestServlet extends HttpServlet {
                 Tags.SPAN_KIND.set(scope.span(), Tags.SPAN_KIND_SERVER);
                 Tags.HTTP_METHOD.set(scope.span(), request.getMethod());
                 Tags.HTTP_URL.set(scope.span(), request.getRequestURL().toString());
+                String pi = request.getPathInfo();
+                if (CFG_TRACE_TAGS.value()) {
+                    if (pi != null) {
+                        int i = 0;
+                        for (String part : pi.split("/")) {
+                            scope.span().setTag("urlpart" + i, part);
+                            i++;
+                        }
+                    }
+                    Map<String, String[]> map = request.getParameterMap();
+                    if (map != null) {
+                        for (Map.Entry<String, String[]> me : map.entrySet())
+                            scope.span().setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
+                    }
+                }
             }
 
             if (path == null || path.length() < 1) {
@@ -373,7 +391,7 @@ public class RestServlet extends HttpServlet {
                         + ":"
                         + remotePort
                         + "\n Subject: "
-                        + subject
+                        + (subject == null ? "?" : subject.getPrincipal())
                         + "\n Method: "
                         + method
                         + "\n Request: "
@@ -441,10 +459,17 @@ public class RestServlet extends HttpServlet {
             ObjectMapper m = new ObjectMapper();
 
             ObjectNode json = m.createObjectNode();
+            json.put("_timestamp", System.currentTimeMillis());
             json.put("_sequence", id);
             if (user != null) json.put("_user", String.valueOf(user.getPrincipal()));
             json.put("_error", errNr);
             json.put("_errorMessage", errMsg);
+            if (ITracer.get().current() != null)
+                try {
+                    ITracer.get().tracer().inject(ITracer.get().current().context(), Format.Builtin.TEXT_MAP, new TraceJsonMap(json, "_"));
+                } catch (Throwable t2) {
+                    log.d(t2);
+                }
             resp.setContentType("application/json");
             m.writeValue(w, json);
 

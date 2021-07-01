@@ -26,8 +26,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import de.mhus.lib.core.logging.ITracer;
+import de.mhus.lib.core.logging.MLogUtil;
+import de.mhus.lib.core.logging.TraceJsonMap;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.RestResult;
+import io.opentracing.propagation.Format;
 
 public class JsonResult implements RestResult {
 
@@ -56,6 +60,12 @@ public class JsonResult implements RestResult {
             Subject subject = SecurityUtils.getSubject();
             if (subject.isAuthenticated())
                 ((ObjectNode) json).put("_user", String.valueOf(subject.getPrincipal()));
+            if (ITracer.get().current() != null)
+                try {
+                    ITracer.get().tracer().inject(ITracer.get().current().context(), Format.Builtin.TEXT_MAP, new TraceJsonMap((ObjectNode)json, "_"));
+                } catch (Throwable t2) {
+                    MLogUtil.log().d(getClass(),t2);
+                }
         }
 
         m.writeValue(writer, json);

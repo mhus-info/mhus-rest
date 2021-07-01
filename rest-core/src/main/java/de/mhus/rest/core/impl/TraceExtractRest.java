@@ -23,11 +23,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import io.opentracing.propagation.TextMap;
 
-public class RestTraceMap implements TextMap {
+public class TraceExtractRest implements TextMap {
 
     private HttpServletRequest request;
 
-    public RestTraceMap(HttpServletRequest request) {
+    public TraceExtractRest(HttpServletRequest request) {
         this.request = request;
     }
 
