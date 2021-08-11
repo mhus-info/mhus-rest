@@ -24,7 +24,6 @@ public interface RestResult {
     public void write(CallContext context, PrintWriter writer) throws Exception;
 
     public String getContentType(CallContext context);
-    
+
     public int getReturnCode();
-    
 }

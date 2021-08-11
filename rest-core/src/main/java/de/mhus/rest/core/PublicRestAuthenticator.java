@@ -22,10 +22,7 @@ public class PublicRestAuthenticator implements RestAuthorisation {
 
     @Override
     public Subject authorize(
-            RestRegistry restRegistry,
-            String name,
-            String action,
-            CallContext context) {
+            RestRegistry restRegistry, String name, String action, CallContext context) {
         Subject subject = SecurityUtils.getSubject();
         return subject;
     }

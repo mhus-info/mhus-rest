@@ -63,8 +63,8 @@ public class RestRegistry extends MLog {
         context.setNodeIdent(ident); // remember last ident
         return next.lookup(parts, context);
     }
-    
-    public void checkPermission(CallContext context, String action ) {
+
+    public void checkPermission(CallContext context, String action) {
         String ident = context.getNodeIdent();
         if (ident == null) {
             log().d("ident is null");
@@ -72,21 +72,23 @@ public class RestRegistry extends MLog {
         }
         RestNodeService next = register.get(ident);
         if (next == null) {
-            log().d("node is null",ident);
+            log().d("node is null", ident);
             throw new AccessDeniedException("access denied (4)");
         }
         checkPermission(context, next, ident, action);
     }
-    
-    public void checkPermission(CallContext context, RestNodeService next, String ident, String action ) {
-        
+
+    public void checkPermission(
+            CallContext context, RestNodeService next, String ident, String action) {
+
         if (context.getAuthorisation() == null) {
             Subject subject = SecurityUtils.getSubject();
             try {
-                if (Aaa.isAnnotated(next.getClass()))
-                    Aaa.checkPermission(next.getClass());
+                if (Aaa.isAnnotated(next.getClass())) Aaa.checkPermission(next.getClass());
                 else // default access check
-                    subject.checkPermission(new WildcardPermission("de.mhus.rest.core.node:"+action+":" + ident));
+                subject.checkPermission(
+                            new WildcardPermission(
+                                    "de.mhus.rest.core.node:" + action + ":" + ident));
                 log().d("access granted", subject, "de.mhus.rest.core.node", action, ident);
             } catch (AuthorizationException e) {
                 log().d("access denied", subject, "de.mhus.rest.core.node", action, ident);
@@ -102,6 +104,5 @@ public class RestRegistry extends MLog {
                 throw new AccessDeniedException("access denied (2)");
             }
         }
-        
     }
 }

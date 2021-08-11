@@ -44,7 +44,12 @@ public class CallContext {
     private String nodeIdent;
     private boolean returnTrace;
 
-    public CallContext(Object orgRequest, Object orgResponse, RestRequest req, MHttp.METHOD method, boolean returnTrace) {
+    public CallContext(
+            Object orgRequest,
+            Object orgResponse,
+            RestRequest req,
+            MHttp.METHOD method,
+            boolean returnTrace) {
         this.orgRequest = orgRequest;
         this.orgResponse = orgResponse;
         this.req = req;
@@ -99,8 +104,7 @@ public class CallContext {
 
     public Object get(String key) {
         synchronized (this) {
-            if (context == null)
-                return null;
+            if (context == null) return null;
         }
         return context.get(key);
     }
@@ -111,16 +115,14 @@ public class CallContext {
 
     public void put(String key, Object value) {
         synchronized (this) {
-            if (context == null)
-                context = new MProperties();
+            if (context == null) context = new MProperties();
         }
         context.put(key, value);
     }
 
     public String[] getNames() {
         synchronized (this) {
-            if (context == null)
-                return new String[0];
+            if (context == null) return new String[0];
         }
         return context.keySet().toArray(new String[0]);
     }
@@ -149,49 +151,49 @@ public class CallContext {
     public InputStream getLoadContent() {
         return req.getLoadContent();
     }
-    
+
     public void setResponseEncoding(String charset) {
         if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
             throw new NotSupportedException("response is not HttpServletResponse");
-        ((HttpServletResponse)orgResponse).setCharacterEncoding(charset);
+        ((HttpServletResponse) orgResponse).setCharacterEncoding(charset);
     }
-    
+
     public void setResponseHeader(String name, String value) {
         if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
             throw new NotSupportedException("response is not HttpServletResponse");
         if (value == null) return;
-        ((HttpServletResponse)orgResponse).setHeader(name, value);
+        ((HttpServletResponse) orgResponse).setHeader(name, value);
     }
-    
+
     public void setResponseHeader(String name, int value) {
         if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
             throw new NotSupportedException("response is not HttpServletResponse");
-        ((HttpServletResponse)orgResponse).setIntHeader(name, value);
+        ((HttpServletResponse) orgResponse).setIntHeader(name, value);
     }
-    
+
     public void setResponseHeader(String name, Date value) {
         if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
             throw new NotSupportedException("response is not HttpServletResponse");
         if (value == null) return;
-        ((HttpServletResponse)orgResponse).setDateHeader(name, value.getTime());
+        ((HttpServletResponse) orgResponse).setDateHeader(name, value.getTime());
     }
-    
+
     /**
-     * The original request depends on the underlying technology. It could be a HttpServletRequest for
-     * Servlets or a jetty UpgradeRequest for WebSocket calls. Sometimes it's needed to interact with the original
-     * call objects.
-     * 
+     * The original request depends on the underlying technology. It could be a HttpServletRequest
+     * for Servlets or a jetty UpgradeRequest for WebSocket calls. Sometimes it's needed to interact
+     * with the original call objects.
+     *
      * @return The original request
      */
     public Object getOriginalRequest() {
         return orgRequest;
     }
-    
+
     /**
-     * The original request depends on the underlying technology. It could be a HttpServletResponse for
-     * Servlets or a jetty Session for WebSocket calls. Sometimes it's needed to interact with the original
-     * call objects.
-     * 
+     * The original request depends on the underlying technology. It could be a HttpServletResponse
+     * for Servlets or a jetty Session for WebSocket calls. Sometimes it's needed to interact with
+     * the original call objects.
+     *
      * @return The original response
      */
     public Object getOriginalResponse() {
@@ -209,5 +211,4 @@ public class CallContext {
     public boolean isReturnTrace() {
         return returnTrace;
     }
-    
 }

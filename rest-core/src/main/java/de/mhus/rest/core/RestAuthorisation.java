@@ -19,9 +19,5 @@ import org.apache.shiro.subject.Subject;
 
 public interface RestAuthorisation {
 
-    Subject authorize(
-            RestRegistry restRegistry,
-            String name,
-            String action,
-            CallContext context);
+    Subject authorize(RestRegistry restRegistry, String name, String action, CallContext context);
 }

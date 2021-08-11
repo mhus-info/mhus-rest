@@ -153,7 +153,8 @@ public class RestServlet extends HttpServlet {
                     Map<String, String[]> map = request.getParameterMap();
                     if (map != null) {
                         for (Map.Entry<String, String[]> me : map.entrySet())
-                            scope.span().setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
+                            scope.span()
+                                    .setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
                     }
                 }
             }
@@ -238,8 +239,7 @@ public class RestServlet extends HttpServlet {
                                     }
                                 }),
                         MHttp.toMethod(method),
-                        CFG_TRACE_RETURN.value()
-                        );
+                        CFG_TRACE_RETURN.value());
 
         RestApi restService = getRestService();
 
@@ -283,8 +283,7 @@ public class RestServlet extends HttpServlet {
                 if (callContext.hasAction()) {
                     restService.checkPermission(item, callContext.getAction(), callContext);
                     res = item.doAction(callContext);
-                }
-                else {
+                } else {
                     restService.checkPermission(item, "create", callContext);
                     res = item.doCreate(callContext);
                 }
@@ -306,11 +305,10 @@ public class RestServlet extends HttpServlet {
 
             try {
                 if (res != null) {
-//                    resp.setHeader("Encapsulated", "result");
+                    //                    resp.setHeader("Encapsulated", "result");
                     log.d("result", id, res);
                     int rc = res.getReturnCode();
-                    if (rc < 0)
-                    	resp.setStatus(-rc);
+                    if (rc < 0) resp.setStatus(-rc);
                     resp.setContentType(res.getContentType(callContext));
                     res.write(callContext, resp.getWriter());
                 }
@@ -468,7 +466,12 @@ public class RestServlet extends HttpServlet {
             json.put("_errorMessage", errMsg);
             if (CFG_TRACE_RETURN.value() && ITracer.get().current() != null)
                 try {
-                    ITracer.get().tracer().inject(ITracer.get().current().context(), Format.Builtin.TEXT_MAP, new TraceJsonMap(json, "_"));
+                    ITracer.get()
+                            .tracer()
+                            .inject(
+                                    ITracer.get().current().context(),
+                                    Format.Builtin.TEXT_MAP,
+                                    new TraceJsonMap(json, "_"));
                 } catch (Throwable t2) {
                     log.d(t2);
                 }

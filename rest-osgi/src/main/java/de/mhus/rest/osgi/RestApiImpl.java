@@ -33,7 +33,7 @@ import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.impl.AbstractRestApi;
 
-@Component(immediate = true,service = RestApi.class )
+@Component(immediate = true, service = RestApi.class)
 public class RestApiImpl extends AbstractRestApi {
 
     private BundleContext context;
@@ -132,13 +132,11 @@ public class RestApiImpl extends AbstractRestApi {
                     register.getRegistry().put(key, service);
                 }
             }
-            
         }
     }
 
     @Override
     public void checkPermission(Node item, String action, CallContext callContext) {
-        register.checkPermission(callContext, action );
+        register.checkPermission(callContext, action);
     }
-
 }

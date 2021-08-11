@@ -107,5 +107,4 @@ public abstract class AbstractRestApi extends MLog implements RestApi {
         if (list == null) return 0;
         return list.size();
     }
-
 }

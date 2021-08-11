@@ -62,9 +62,14 @@ public class JsonResult implements RestResult {
                 ((ObjectNode) json).put("_user", String.valueOf(subject.getPrincipal()));
             if (context.isReturnTrace() && ITracer.get().current() != null)
                 try {
-                    ITracer.get().tracer().inject(ITracer.get().current().context(), Format.Builtin.TEXT_MAP, new TraceJsonMap((ObjectNode)json, "_"));
+                    ITracer.get()
+                            .tracer()
+                            .inject(
+                                    ITracer.get().current().context(),
+                                    Format.Builtin.TEXT_MAP,
+                                    new TraceJsonMap((ObjectNode) json, "_"));
                 } catch (Throwable t2) {
-                    MLogUtil.log().d(getClass(),t2);
+                    MLogUtil.log().d(getClass(), t2);
                 }
         }
 
@@ -110,13 +115,12 @@ public class JsonResult implements RestResult {
         return (ArrayNode) json;
     }
 
-	@Override
+    @Override
     public int getReturnCode() {
-		return returnCode;
-	}
+        return returnCode;
+    }
 
-	public void setReturnCode(int returnCode) {
-		this.returnCode = returnCode;
-	}
-
+    public void setReturnCode(int returnCode) {
+        this.returnCode = returnCode;
+    }
 }
