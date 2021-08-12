@@ -30,7 +30,7 @@
 	<packaging>pom</packaging>
 	<name>mhus-rest</name>
 	<description>Rest framework for deep rest structures.</description>
-	<url>http://www.mhus.de</url>
+	<url>http://www.mhus.info</url>
 
     <inceptionYear>2020</inceptionYear>
 	<licenses>
@@ -42,8 +42,8 @@
 	</licenses>
 	
 	<scm>
-		<url>https://github.com/mhus/mhus-rest</url>
-		<connection>scm:git:https://github.com/mhus/mhus-rest/</connection>
+		<url>https://github.com/mhus-info/mhus-rest</url>
+		<connection>scm:git:https://github.com/mhus-info/mhus-rest/</connection>
 	</scm>
 	
 	<developers>
