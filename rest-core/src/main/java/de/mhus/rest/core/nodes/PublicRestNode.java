@@ -57,7 +57,7 @@ public class PublicRestNode extends SingleObjectNode<Object> {
 
     @Override
     protected Object getObject(CallContext callContext) throws Exception {
-        return new Object();
+        return "";
     }
 
     public void onPing(JsonResult result, CallContext callContext) throws Exception {
