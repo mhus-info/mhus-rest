@@ -26,6 +26,8 @@ public interface Node {
 
     String PUBLIC_NODE_NAME = "public";
 
+    String PUBLIC_PARENT = "de.mhus.rest.core.nodes.PublicRestNode";
+    
     String ROOT_PARENT = "";
 
     Node lookup(List<String> parts, CallContext callContext) throws Exception;
