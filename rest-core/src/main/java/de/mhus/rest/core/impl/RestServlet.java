@@ -110,20 +110,83 @@ public class RestServlet extends HttpServlet {
 
         response.setCharacterEncoding(MString.CHARSET_UTF_8); // default
 
-        // authenticate - find login token
-        AuthenticationToken token = null;
-        RestRequest restRequest = new RestRequestWrapper(request);
-        for (RestAuthenticator authenticator : authenticators) {
-            token = authenticator.authenticate(restRequest);
-            if (token != null) break;
+        
+        Scope scope = null;
+        try {
+
+            final String path = request.getPathInfo();
+
+            if (path == null || path.length() < 1) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+
+            // tracing
+            SpanContext parentSpanCtx =
+                    ITracer.get()
+                            .tracer()
+                            .extract(Format.Builtin.HTTP_HEADERS, new TraceExtractRest(request));
+
+            String trace = request.getParameter("_trace");
+            if (MString.isEmpty(trace)) trace = CFG_TRACE_ACTIVE.value();
+
+            if (parentSpanCtx == null) {
+                scope = ITracer.get().start("rest", trace);
+            } else if (parentSpanCtx != null) {
+                scope =
+                        ITracer.get()
+                                .tracer()
+                                .buildSpan("rest")
+                                .asChildOf(parentSpanCtx)
+                                .startActive(true);
+            }
+
+            if (MString.isSet(trace)) ITracer.get().activate(trace);
+
+            if (scope != null) {
+                // method
+                String method = request.getParameter("_method");
+                if (method == null) method = request.getMethod();
+                method = method.toUpperCase();
+
+                Tags.SPAN_KIND.set(scope.span(), Tags.SPAN_KIND_SERVER);
+                Tags.HTTP_METHOD.set(scope.span(), method);
+                Tags.HTTP_URL.set(scope.span(), request.getRequestURL().toString());
+                String pi = request.getPathInfo();
+                if (CFG_TRACE_TAGS.value()) {
+                    if (pi != null) {
+                        int i = 0;
+                        for (String part : pi.split("/")) {
+                            scope.span().setTag("urlpart" + i, part);
+                            i++;
+                        }
+                    }
+                    Map<String, String[]> map = request.getParameterMap();
+                    if (map != null) {
+                        for (Map.Entry<String, String[]> me : map.entrySet())
+                            scope.span()
+                                    .setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
+                    }
+                }
+            }
+
+            // authenticate - find login token
+            AuthenticationToken token = null;
+            RestRequest restRequest = new RestRequestWrapper(request);
+            for (RestAuthenticator authenticator : authenticators) {
+                token = authenticator.authenticate(restRequest);
+                if (token != null) break;
+            }
+
+            // create shiro Subject and execute
+            final AuthenticationToken finalToken = token;
+            Subject subject = M.l(AccessApi.class).createSubject();
+            subject.execute(() -> serviceInSession(request, response, path, finalToken));
+
+        } finally {
+            if (scope != null) scope.close();
         }
-
-        // create shiro Subject and execute
-        final AuthenticationToken finalToken = token;
-        Subject subject = M.l(AccessApi.class).createSubject();
-        final String path = request.getPathInfo();
-        subject.execute(() -> serviceInSession(request, response, path, finalToken));
-
     }
 
     private Object serviceInSession(
@@ -142,6 +205,7 @@ public class RestServlet extends HttpServlet {
         // method
         String method = req.getParameter("_method");
         if (method == null) method = req.getMethod();
+        method = method.toUpperCase();
         // parts of path
         List<String> parts = new LinkedList<String>(Arrays.asList(path.split("/")));
         if (parts.size() == 0) return null;
@@ -162,173 +226,100 @@ public class RestServlet extends HttpServlet {
             return onLoginFailure(req, resp, id);
         }
 
-        Scope scope = null;
-        try {
+        // create call context object
+        CallContext callContext =
+                new CallContext(
+                        req,
+                        resp,
+                        new CachedRestRequest(
+                                req.getParameterMap(),
+                                null,
+                                new Provider<InputStream>() {
 
-            if (path == null || path.length() < 1) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return null;
-            }
-
-            // tracing
-            SpanContext parentSpanCtx =
-                    ITracer.get()
-                            .tracer()
-                            .extract(Format.Builtin.HTTP_HEADERS, new TraceExtractRest(req));
-
-            String trace = req.getParameter("_trace");
-            if (MString.isEmpty(trace)) trace = CFG_TRACE_ACTIVE.value();
-
-            if (parentSpanCtx == null) {
-                scope = ITracer.get().start("rest", trace);
-            } else if (parentSpanCtx != null) {
-                scope =
-                        ITracer.get()
-                                .tracer()
-                                .buildSpan("rest")
-                                .asChildOf(parentSpanCtx)
-                                .startActive(true);
-            }
-
-            if (MString.isSet(trace)) ITracer.get().activate(trace);
-
-            if (scope != null) {
-                Tags.SPAN_KIND.set(scope.span(), Tags.SPAN_KIND_SERVER);
-                Tags.HTTP_METHOD.set(scope.span(), req.getMethod());
-                Tags.HTTP_URL.set(scope.span(), req.getRequestURL().toString());
-                String pi = req.getPathInfo();
-                if (CFG_TRACE_TAGS.value()) {
-                    if (pi != null) {
-                        int i = 0;
-                        for (String part : pi.split("/")) {
-                            scope.span().setTag("urlpart" + i, part);
-                            i++;
-                        }
-                    }
-                    Map<String, String[]> map = req.getParameterMap();
-                    if (map != null) {
-                        for (Map.Entry<String, String[]> me : map.entrySet())
-                            scope.span()
-                                    .setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
-                    }
-                }
-            }
-            
-            // create call context object
-            CallContext callContext =
-                    new CallContext(
-                            req,
-                            resp,
-                            new CachedRestRequest(
-                                    req.getParameterMap(),
-                                    null,
-                                    new Provider<InputStream>() {
-    
-                                        @Override
-                                        public InputStream get() {
-                                            try {
-                                                return req.getInputStream();
-                                            } catch (IOException e) {
-                                                log.d(e);
-                                                return null;
-                                            }
+                                    @Override
+                                    public InputStream get() {
+                                        try {
+                                            return req.getInputStream();
+                                        } catch (IOException e) {
+                                            log.d(e);
+                                            return null;
                                         }
-                                    }),
-                            MHttp.toMethod(method),
-                            CFG_TRACE_RETURN.value());
-    
-            RestApi restService = getRestService();
-    
-            RestResult res = null;
-    
-            if (method.equals(MHttp.METHOD_HEAD)) {
-                // nothing more to do
+                                    }
+                                }),
+                        MHttp.toMethod(method),
+                        CFG_TRACE_RETURN.value());
+
+        RestApi restService = getRestService();
+
+        RestResult res = null;
+
+        if (method.equals(MHttp.METHOD_HEAD)) {
+            // nothing more to do
+            return null;
+        }
+
+        try {
+            Node item = restService.lookup(parts, null, callContext);
+
+            if (item == null) {
+                sendError(
+                        id,
+                        req,
+                        resp,
+                        HttpServletResponse.SC_NOT_FOUND,
+                        "Resource Not Found",
+                        null,
+                        subject);
                 return null;
             }
-    
+
+            // log access
+            logAccess(
+                    id,
+                    req.getRemoteAddr(),
+                    req.getRemotePort(),
+                    subject,
+                    method,
+                    req.getPathInfo(),
+                    req.getParameterMap());
+
+            if (method.equals(MHttp.METHOD_GET)) {
+                restService.checkPermission(item, "read", callContext);
+                res = item.doRead(callContext);
+            } else if (method.equals(MHttp.METHOD_POST)) {
+
+                if (callContext.hasAction()) {
+                    restService.checkPermission(item, callContext.getAction(), callContext);
+                    res = item.doAction(callContext);
+                } else {
+                    restService.checkPermission(item, "create", callContext);
+                    res = item.doCreate(callContext);
+                }
+            } else if (method.equals(MHttp.METHOD_PUT)) {
+                restService.checkPermission(item, "update", callContext);
+                res = item.doUpdate(callContext);
+            } else if (method.equals(MHttp.METHOD_DELETE)) {
+                restService.checkPermission(item, "delete", callContext);
+                res = item.doDelete(callContext);
+            } else if (method.equals(MHttp.METHOD_TRACE)) {
+
+            }
+
+            if (res == null) {
+                sendError(
+                        id, req, resp, HttpServletResponse.SC_NOT_IMPLEMENTED, null, null, subject);
+                return null;
+            }
+
             try {
-                Node item = restService.lookup(parts, null, callContext);
-    
-                if (item == null) {
-                    sendError(
-                            id,
-                            req,
-                            resp,
-                            HttpServletResponse.SC_NOT_FOUND,
-                            "Resource Not Found",
-                            null,
-                            subject);
-                    return null;
+                if (res != null) {
+                    //                    resp.setHeader("Encapsulated", "result");
+                    log.d("result", id, res);
+                    int rc = res.getReturnCode();
+                    if (rc < 0) resp.setStatus(-rc);
+                    resp.setContentType(res.getContentType(callContext));
+                    res.write(callContext, resp.getWriter());
                 }
-    
-                // log access
-                logAccess(
-                        id,
-                        req.getRemoteAddr(),
-                        req.getRemotePort(),
-                        subject,
-                        method,
-                        req.getPathInfo(),
-                        req.getParameterMap());
-    
-                if (method.equals(MHttp.METHOD_GET)) {
-                    restService.checkPermission(item, "read", callContext);
-                    res = item.doRead(callContext);
-                } else if (method.equals(MHttp.METHOD_POST)) {
-    
-                    if (callContext.hasAction()) {
-                        restService.checkPermission(item, callContext.getAction(), callContext);
-                        res = item.doAction(callContext);
-                    } else {
-                        restService.checkPermission(item, "create", callContext);
-                        res = item.doCreate(callContext);
-                    }
-                } else if (method.equals(MHttp.METHOD_PUT)) {
-                    restService.checkPermission(item, "update", callContext);
-                    res = item.doUpdate(callContext);
-                } else if (method.equals(MHttp.METHOD_DELETE)) {
-                    restService.checkPermission(item, "delete", callContext);
-                    res = item.doDelete(callContext);
-                } else if (method.equals(MHttp.METHOD_TRACE)) {
-    
-                }
-    
-                if (res == null) {
-                    sendError(
-                            id, req, resp, HttpServletResponse.SC_NOT_IMPLEMENTED, null, null, subject);
-                    return null;
-                }
-    
-                try {
-                    if (res != null) {
-                        //                    resp.setHeader("Encapsulated", "result");
-                        log.d("result", id, res);
-                        int rc = res.getReturnCode();
-                        if (rc < 0) resp.setStatus(-rc);
-                        resp.setContentType(res.getContentType(callContext));
-                        res.write(callContext, resp.getWriter());
-                    }
-                } catch (Throwable t) {
-                    log.d(t);
-                    sendError(
-                            id,
-                            req,
-                            resp,
-                            HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                            t.getMessage(),
-                            t,
-                            subject);
-                    return null;
-                }
-    
-            } catch (AccessDeniedException e) {
-                log.d(e);
-                sendError(id, req, resp, 404, e.getMessage(), e, subject);
-                return null;
-            } catch (RestException t) {
-                log.d(t);
-                sendError(id, req, resp, t.getErrorId(), t.getMessage(), t, subject);
-                return null;
             } catch (Throwable t) {
                 log.d(t);
                 sendError(
@@ -341,12 +332,28 @@ public class RestServlet extends HttpServlet {
                         subject);
                 return null;
             }
-            return null;
-            
-        } finally {
-            if (scope != null) scope.close();
-        }
 
+        } catch (AccessDeniedException e) {
+            log.d(e);
+            sendError(id, req, resp, 404, e.getMessage(), e, subject);
+            return null;
+        } catch (RestException t) {
+            log.d(t);
+            sendError(id, req, resp, t.getErrorId(), t.getMessage(), t, subject);
+            return null;
+        } catch (Throwable t) {
+            log.d(t);
+            sendError(
+                    id,
+                    req,
+                    resp,
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    t.getMessage(),
+                    t,
+                    subject);
+            return null;
+        }
+        return null;
     }
 
     public boolean isPublicPath(String path) {
