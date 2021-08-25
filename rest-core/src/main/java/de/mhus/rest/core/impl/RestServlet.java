@@ -110,10 +110,28 @@ public class RestServlet extends HttpServlet {
 
         response.setCharacterEncoding(MString.CHARSET_UTF_8); // default
 
+        
         Scope scope = null;
         try {
 
             final String path = request.getPathInfo();
+
+            if (path == null || path.length() < 1) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            // authenticate - find login token
+            AuthenticationToken token = null;
+            RestRequest restRequest = new RestRequestWrapper(request);
+            for (RestAuthenticator authenticator : authenticators) {
+                token = authenticator.authenticate(restRequest);
+                if (token != null) break;
+            }
+
+            // create shiro Subject and execute
+            final AuthenticationToken finalToken = token;
+            Subject subject = M.l(AccessApi.class).createSubject();
 
             // tracing
             SpanContext parentSpanCtx =
@@ -140,7 +158,9 @@ public class RestServlet extends HttpServlet {
             if (scope != null) {
                 Tags.SPAN_KIND.set(scope.span(), Tags.SPAN_KIND_SERVER);
                 Tags.HTTP_METHOD.set(scope.span(), request.getMethod());
-                Tags.HTTP_URL.set(scope.span(), request.getRequestURL().toString());
+                Tags.HTTP_URL.set(scope.span(), String.valueOf(request.getRequestURL()));
+                scope.span().setTag("principal", String.valueOf(subject.getPrincipal()));
+
                 String pi = request.getPathInfo();
                 if (CFG_TRACE_TAGS.value()) {
                     if (pi != null) {
@@ -159,22 +179,6 @@ public class RestServlet extends HttpServlet {
                 }
             }
 
-            if (path == null || path.length() < 1) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            // authenticate - find login token
-            AuthenticationToken token = null;
-            RestRequest restRequest = new RestRequestWrapper(request);
-            for (RestAuthenticator authenticator : authenticators) {
-                token = authenticator.authenticate(restRequest);
-                if (token != null) break;
-            }
-
-            // create shiro Subject and execute
-            final AuthenticationToken finalToken = token;
-            Subject subject = M.l(AccessApi.class).createSubject();
             subject.execute(() -> serviceInSession(request, response, path, finalToken));
 
         } finally {
@@ -384,8 +388,12 @@ public class RestServlet extends HttpServlet {
 
         String paramLog = getParameterLog(parameterMap);
         log.d(
-                "access",
+                "restaccess",
                 id,
+                (subject == null ? "?" : subject.getPrincipal()),
+                ITracer.get().getCurrentId(),
+                method,
+                pathInfo,
                 "\n Remote: "
                         + remoteAddr
                         + ":"
