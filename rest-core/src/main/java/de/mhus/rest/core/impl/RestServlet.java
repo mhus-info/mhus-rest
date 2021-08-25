@@ -110,7 +110,6 @@ public class RestServlet extends HttpServlet {
 
         response.setCharacterEncoding(MString.CHARSET_UTF_8); // default
 
-        
         Scope scope = null;
         try {
 
@@ -120,7 +119,6 @@ public class RestServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-
 
             // tracing
             SpanContext parentSpanCtx =
