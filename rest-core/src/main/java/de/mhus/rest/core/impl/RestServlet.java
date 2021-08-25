@@ -159,7 +159,8 @@ public class RestServlet extends HttpServlet {
                 Tags.SPAN_KIND.set(scope.span(), Tags.SPAN_KIND_SERVER);
                 Tags.HTTP_METHOD.set(scope.span(), request.getMethod());
                 Tags.HTTP_URL.set(scope.span(), String.valueOf(request.getRequestURL()));
-                scope.span().setTag("principal", String.valueOf(subject.getPrincipal()));
+                if (subject != null && subject.getPrincipal() != null)
+                    scope.span().setTag("user", String.valueOf(subject.getPrincipal()));
 
                 String pi = request.getPathInfo();
                 if (CFG_TRACE_TAGS.value()) {
@@ -389,11 +390,11 @@ public class RestServlet extends HttpServlet {
         String paramLog = getParameterLog(parameterMap);
         log.d(
                 "restaccess",
-                id,
                 (subject == null ? "?" : subject.getPrincipal()),
                 ITracer.get().getCurrentId(),
                 method,
                 pathInfo,
+                id,
                 "\n Remote: "
                         + remoteAddr
                         + ":"
