@@ -15,8 +15,11 @@
  */
 package de.mhus.rest.core.node;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import de.mhus.lib.core.node.INode;
+import de.mhus.lib.core.node.JsonNodeBuilder;
 import de.mhus.lib.core.operation.OperationResult;
 import de.mhus.lib.core.pojo.MPojo;
 import de.mhus.lib.core.pojo.PojoModelFactory;
@@ -38,8 +41,18 @@ public abstract class SingleObjectNode<T> extends JsonSingleNode<T> {
         if (obj == null) throw new NotFoundException();
 
         doPrepareForOutput(obj, callContext, false);
-        ObjectNode jRoot = result.createObjectNode();
-        MPojo.pojoToJson(obj, jRoot, schema, true);
+
+        if (obj instanceof JsonNode) {
+            result.setJson((JsonNode)obj);
+        } else
+        if (obj instanceof INode) {
+            JsonNodeBuilder builder = new JsonNodeBuilder();
+            JsonNode out = builder.writeToJsonNode((INode) obj);
+            result.setJson(out);
+        } else {
+            ObjectNode jRoot = result.createObjectNode();
+            MPojo.pojoToJson(obj, jRoot, schema, true);
+        }
     }
 
     protected PojoModelFactory getPojoModelFactory() {
