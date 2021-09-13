@@ -17,44 +17,47 @@ package de.mhus.rest.core.node;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import de.mhus.lib.core.pojo.MPojo;
-import de.mhus.lib.core.pojo.PojoModelFactory;
 import de.mhus.lib.errors.MException;
 import de.mhus.lib.errors.NotFoundException;
 import de.mhus.lib.errors.NotSupportedException;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.result.JsonResult;
-import de.mhus.rest.core.util.RestUtil;
+import de.mhus.rest.core.transform.ObjectTransformer;
 
 public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
+
+    protected ObjectTransformer transformer;
+
+    public ObjectListNode() {
+        loadTransformer();
+    }
+
+    protected void loadTransformer() {
+        transformer = ObjectTransformer.create(this.getClass());
+    }
 
     @Override
     public void doRead(JsonResult result, CallContext callContext) throws Exception {
 
-        PojoModelFactory schema = getPojoModelFactory();
-
         T obj = getObjectFromContext(callContext, getManagedClassName());
         if (obj != null) {
             doPrepareForOutput(obj, callContext);
-            ObjectNode jRoot = result.createObjectNode();
-            MPojo.pojoToJson(obj, jRoot, schema, true);
+            JsonNode jItem = transformer.toJsonNode(obj);
+            if (jItem == null) throw new NotFoundException();
+            result.setJson(jItem);
         } else {
             ArrayNode jList = result.createArrayNode();
 
             for (L item : getObjectList(callContext)) {
                 doPrepareForOutputList(item, callContext);
-                ObjectNode jItem = jList.objectNode();
-                jList.add(jItem);
-                MPojo.pojoToJson(item, jItem, schema, true);
+                JsonNode jItem = transformer.toJsonNode(item);
+                if (jItem != null)
+                    jList.add(jItem);
             }
         }
-    }
-
-    protected PojoModelFactory getPojoModelFactory() {
-        return RestUtil.getPojoModelFactory();
     }
 
     protected abstract List<L> getObjectList(CallContext callContext) throws MException;
@@ -81,10 +84,9 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
 
         doUpdateObj(obj, callContext);
 
-        PojoModelFactory schema = getPojoModelFactory();
         doPrepareForOutput(obj, callContext);
-        ObjectNode jRoot = result.createObjectNode();
-        MPojo.pojoToJson(obj, jRoot, schema, true);
+        JsonNode jItem = transformer.toJsonNode(obj);
+        result.setJson(jItem);
     }
 
     @Override
@@ -92,10 +94,9 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
 
         T obj = doCreateObj(callContext);
 
-        PojoModelFactory schema = getPojoModelFactory();
         doPrepareForOutput(obj, callContext);
-        ObjectNode jRoot = result.createObjectNode();
-        MPojo.pojoToJson(obj, jRoot, schema, true);
+        JsonNode jItem = transformer.toJsonNode(obj);
+        result.setJson(jItem);
     }
 
     @Override
@@ -105,10 +106,9 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
 
         doDeleteObj(obj, callContext);
 
-        PojoModelFactory schema = getPojoModelFactory();
         doPrepareForOutput(obj, callContext);
-        ObjectNode jRoot = result.createObjectNode();
-        MPojo.pojoToJson(obj, jRoot, schema, true);
+        JsonNode jItem = transformer.toJsonNode(obj);
+        result.setJson(jItem);
     }
 
     protected T doCreateObj(CallContext callContext) throws Exception {

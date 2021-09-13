@@ -16,47 +16,42 @@
 package de.mhus.rest.core.node;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import de.mhus.lib.core.node.INode;
-import de.mhus.lib.core.node.JsonNodeBuilder;
 import de.mhus.lib.core.operation.OperationResult;
-import de.mhus.lib.core.pojo.MPojo;
-import de.mhus.lib.core.pojo.PojoModelFactory;
 import de.mhus.lib.errors.MException;
 import de.mhus.lib.errors.NotFoundException;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.RestException;
 import de.mhus.rest.core.result.JsonResult;
-import de.mhus.rest.core.util.RestUtil;
+import de.mhus.rest.core.transform.ObjectTransformer;
 
 public abstract class SingleObjectNode<T> extends JsonSingleNode<T> {
 
+    protected ObjectTransformer transformer = null;
+
+    public SingleObjectNode() {
+        loadTransformer();
+    }
+
+    protected void loadTransformer() {
+        transformer = ObjectTransformer.create(this.getClass());
+    }
+
     @Override
     public void doRead(JsonResult result, CallContext callContext) throws Exception {
-
-        PojoModelFactory schema = getPojoModelFactory();
 
         T obj = getObjectFromContext(callContext, getManagedClassName());
         if (obj == null) throw new NotFoundException();
 
         doPrepareForOutput(obj, callContext, false);
 
-        if (obj instanceof JsonNode) {
-            result.setJson((JsonNode)obj);
-        } else
-        if (obj instanceof INode) {
-            JsonNodeBuilder builder = new JsonNodeBuilder();
-            JsonNode out = builder.writeToJsonNode((INode) obj);
-            result.setJson(out);
-        } else {
-            ObjectNode jRoot = result.createObjectNode();
-            MPojo.pojoToJson(obj, jRoot, schema, true);
-        }
+        JsonNode out = transformToJsonNode(obj);
+        if (out == null) throw new NotFoundException();
+        result.setJson(out);
     }
 
-    protected PojoModelFactory getPojoModelFactory() {
-        return RestUtil.getPojoModelFactory();
+    protected JsonNode transformToJsonNode(T obj) {
+        return transformer.toJsonNode(obj);
     }
 
     protected void doPrepareForOutput(T obj, CallContext context, boolean listMode)
@@ -68,6 +63,9 @@ public abstract class SingleObjectNode<T> extends JsonSingleNode<T> {
         if (obj == null) throw new RestException(OperationResult.NOT_FOUND);
 
         doUpdate(obj, callContext);
+        doPrepareForOutput(obj, callContext, false);
+        JsonNode jItem = transformer.toJsonNode(obj);
+        result.setJson(jItem);
     }
 
     protected void doUpdate(T obj, CallContext context) throws MException {}
