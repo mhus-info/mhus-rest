@@ -61,6 +61,7 @@ import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestException;
 import de.mhus.rest.core.api.RestResult;
 import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
 import io.opentracing.tag.Tags;
@@ -132,12 +133,13 @@ public class RestServlet extends HttpServlet {
             if (parentSpanCtx == null) {
                 scope = ITracer.get().start("rest", trace);
             } else if (parentSpanCtx != null) {
-                scope =
+                Span span =
                         ITracer.get()
                                 .tracer()
                                 .buildSpan("rest")
                                 .asChildOf(parentSpanCtx)
-                                .startActive(true);
+                                .start();
+                scope = ITracer.get().tracer().scopeManager().activate(span);
             }
 
             if (MString.isSet(trace)) ITracer.get().activate(trace);
@@ -147,24 +149,23 @@ public class RestServlet extends HttpServlet {
                 String method = request.getParameter("_method");
                 if (method == null) method = request.getMethod();
                 method = method.toUpperCase();
-
-                Tags.SPAN_KIND.set(scope.span(), Tags.SPAN_KIND_SERVER);
-                Tags.HTTP_METHOD.set(scope.span(), method);
-                Tags.HTTP_URL.set(scope.span(), request.getRequestURL().toString());
+                Span span = ITracer.get().current();
+                Tags.SPAN_KIND.set(span, Tags.SPAN_KIND_SERVER);
+                Tags.HTTP_METHOD.set(span, method);
+                Tags.HTTP_URL.set(span, request.getRequestURL().toString());
                 String pi = request.getPathInfo();
                 if (CFG_TRACE_TAGS.value()) {
                     if (pi != null) {
                         int i = 0;
                         for (String part : pi.split("/")) {
-                            scope.span().setTag("urlpart" + i, part);
+                            span.setTag("urlpart" + i, part);
                             i++;
                         }
                     }
                     Map<String, String[]> map = request.getParameterMap();
                     if (map != null) {
                         for (Map.Entry<String, String[]> me : map.entrySet())
-                            scope.span()
-                                    .setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
+                            span.setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
                     }
                 }
             }

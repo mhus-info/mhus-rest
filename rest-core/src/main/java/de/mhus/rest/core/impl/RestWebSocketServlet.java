@@ -61,6 +61,7 @@ import de.mhus.rest.core.RestRequest;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestException;
+import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
 
@@ -145,12 +146,13 @@ public class RestWebSocketServlet extends WebSocketServlet {
             if (parentSpanCtx == null) {
                 socket.scope = ITracer.get().start("rest", trace);
             } else if (parentSpanCtx != null) {
-                socket.scope =
+                Span span =
                         ITracer.get()
                                 .tracer()
                                 .buildSpan("rest")
                                 .asChildOf(parentSpanCtx)
-                                .startActive(true);
+                                .start();
+                socket.scope = ITracer.get().tracer().scopeManager().activate(span);
             }
 
             if (MString.isSet(trace)) ITracer.get().activate(trace);
