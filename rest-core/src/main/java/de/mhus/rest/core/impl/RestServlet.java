@@ -139,7 +139,7 @@ public class RestServlet extends HttpServlet {
                                 .buildSpan("rest")
                                 .asChildOf(parentSpanCtx)
                                 .start();
-                scope = ITracer.get().tracer().scopeManager().activate(span);
+                scope = ITracer.get().activate(span);
             }
 
             if (MString.isSet(trace)) ITracer.get().activate(trace);

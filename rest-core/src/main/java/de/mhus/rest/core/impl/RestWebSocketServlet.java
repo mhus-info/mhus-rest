@@ -152,7 +152,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
                                 .buildSpan("rest")
                                 .asChildOf(parentSpanCtx)
                                 .start();
-                socket.scope = ITracer.get().tracer().scopeManager().activate(span);
+                socket.scope = ITracer.get().activate(span);
             }
 
             if (MString.isSet(trace)) ITracer.get().activate(trace);
