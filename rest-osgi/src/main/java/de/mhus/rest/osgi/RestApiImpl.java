@@ -31,6 +31,7 @@ import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
+import de.mhus.rest.core.api.RestSecurityService;
 import de.mhus.rest.core.impl.AbstractRestApi;
 
 @Component(immediate = true, service = RestApi.class)
@@ -38,6 +39,9 @@ public class RestApiImpl extends AbstractRestApi {
 
     private BundleContext context;
     private ServiceTracker<RestNodeService, RestNodeService> nodeTracker;
+    private ServiceTracker<RestSecurityService, RestSecurityService> securityTracker;
+    public RestSecurityService securityService;
+    public ServiceReference<RestSecurityService> securityReference;
 
     @Activate
     public void doActivate(ComponentContext ctx) {
@@ -47,13 +51,23 @@ public class RestApiImpl extends AbstractRestApi {
                 new ServiceTracker<>(
                         context, RestNodeService.class, new RestNodeServiceTrackerCustomizer());
         nodeTracker.open();
+        
+        securityTracker =
+                new ServiceTracker<>(
+                        context, RestSecurityService.class, new RestSecurityServiceTrackerCustomizer());
+        securityTracker.open();
+
     }
 
     @Deactivate
     public void doDeactivate(ComponentContext ctx) {
         nodeTracker.close();
+        securityTracker.close();
         context = null;
         nodeTracker = null;
+        securityTracker = null;
+        securityReference = null;
+        securityService = null;
         register.getRegistry().clear();
     }
 
@@ -111,6 +125,40 @@ public class RestApiImpl extends AbstractRestApi {
         }
     }
 
+    private class RestSecurityServiceTrackerCustomizer
+    implements ServiceTrackerCustomizer<RestSecurityService, RestSecurityService> {
+
+        @Override
+        public RestSecurityService addingService(ServiceReference<RestSecurityService> reference) {
+        
+            RestSecurityService service = context.getService(reference);
+            if (service != null) {
+                if (securityReference != null)
+                    log().i("Drop Rest Security",securityReference.getBundle().getBundleId());
+                securityReference = reference;
+                securityService = service;
+                log().i("Found Rest Security",securityReference.getBundle().getBundleId());
+            }
+        
+            return service;
+        }
+        
+        @Override
+        public void modifiedService(
+                ServiceReference<RestSecurityService> reference, RestSecurityService service) {}
+        
+        @Override
+        public void removedService(
+                ServiceReference<RestSecurityService> reference, RestSecurityService service) {
+        
+            if (service != null && (securityReference == null || reference.getBundle().getBundleId() == securityReference.getBundle().getBundleId())) {
+                log().i("Remove Rest Security",securityReference.getBundle().getBundleId());
+                securityReference = null;
+                securityService = null;
+            }
+        }
+        }
+    
     @Override
     public void reset() {
         register.getRegistry().clear();
@@ -138,5 +186,12 @@ public class RestApiImpl extends AbstractRestApi {
     @Override
     public void checkPermission(Node item, String action, CallContext callContext) {
         register.checkPermission(callContext, action);
+    }
+
+    @Override
+    public boolean checkSecurity(CallContext callContext) {
+        RestSecurityService s = securityService;
+        if (s == null) return true;
+        return s.checkSecurity(callContext);
     }
 }

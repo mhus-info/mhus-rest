@@ -258,6 +258,9 @@ public class RestServlet extends HttpServlet {
         }
 
         try {
+            if (!restService.checkSecurity(callContext))
+                return null;
+
             Node item = restService.lookup(parts, null, callContext);
 
             if (item == null) {

@@ -46,4 +46,6 @@ public interface RestApi {
     void reset();
 
     void checkPermission(Node item, String string, CallContext callContext);
+
+    boolean checkSecurity(CallContext callContext);
 }
