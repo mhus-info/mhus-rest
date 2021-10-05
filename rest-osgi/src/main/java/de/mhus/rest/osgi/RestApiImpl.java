@@ -51,12 +51,13 @@ public class RestApiImpl extends AbstractRestApi {
                 new ServiceTracker<>(
                         context, RestNodeService.class, new RestNodeServiceTrackerCustomizer());
         nodeTracker.open();
-        
+
         securityTracker =
                 new ServiceTracker<>(
-                        context, RestSecurityService.class, new RestSecurityServiceTrackerCustomizer());
+                        context,
+                        RestSecurityService.class,
+                        new RestSecurityServiceTrackerCustomizer());
         securityTracker.open();
-
     }
 
     @Deactivate
@@ -126,39 +127,42 @@ public class RestApiImpl extends AbstractRestApi {
     }
 
     private class RestSecurityServiceTrackerCustomizer
-    implements ServiceTrackerCustomizer<RestSecurityService, RestSecurityService> {
+            implements ServiceTrackerCustomizer<RestSecurityService, RestSecurityService> {
 
         @Override
         public RestSecurityService addingService(ServiceReference<RestSecurityService> reference) {
-        
+
             RestSecurityService service = context.getService(reference);
             if (service != null) {
                 if (securityReference != null)
-                    log().i("Drop Rest Security",securityReference.getBundle().getBundleId());
+                    log().i("Drop Rest Security", securityReference.getBundle().getBundleId());
                 securityReference = reference;
                 securityService = service;
-                log().i("Found Rest Security",securityReference.getBundle().getBundleId());
+                log().i("Found Rest Security", securityReference.getBundle().getBundleId());
             }
-        
+
             return service;
         }
-        
+
         @Override
         public void modifiedService(
                 ServiceReference<RestSecurityService> reference, RestSecurityService service) {}
-        
+
         @Override
         public void removedService(
                 ServiceReference<RestSecurityService> reference, RestSecurityService service) {
-        
-            if (service != null && (securityReference == null || reference.getBundle().getBundleId() == securityReference.getBundle().getBundleId())) {
-                log().i("Remove Rest Security",securityReference.getBundle().getBundleId());
+
+            if (service != null
+                    && (securityReference == null
+                            || reference.getBundle().getBundleId()
+                                    == securityReference.getBundle().getBundleId())) {
+                log().i("Remove Rest Security", securityReference.getBundle().getBundleId());
                 securityReference = null;
                 securityService = null;
             }
         }
-        }
-    
+    }
+
     @Override
     public void reset() {
         register.getRegistry().clear();

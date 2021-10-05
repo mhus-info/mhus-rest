@@ -134,11 +134,7 @@ public class RestServlet extends HttpServlet {
                 scope = ITracer.get().start("rest", trace);
             } else if (parentSpanCtx != null) {
                 Span span =
-                        ITracer.get()
-                                .tracer()
-                                .buildSpan("rest")
-                                .asChildOf(parentSpanCtx)
-                                .start();
+                        ITracer.get().tracer().buildSpan("rest").asChildOf(parentSpanCtx).start();
                 scope = ITracer.get().activate(span);
             }
 
@@ -258,8 +254,7 @@ public class RestServlet extends HttpServlet {
         }
 
         try {
-            if (!restService.checkSecurity(callContext))
-                return null;
+            if (!restService.checkSecurity(callContext)) return null;
 
             Node item = restService.lookup(parts, null, callContext);
 

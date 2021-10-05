@@ -54,8 +54,7 @@ public abstract class ObjectListNode<T, L> extends JsonListNode<T> {
             for (L item : getObjectList(callContext)) {
                 doPrepareForOutputList(item, callContext);
                 JsonNode jItem = transformer.toJsonNode(item);
-                if (jItem != null)
-                    jList.add(jItem);
+                if (jItem != null) jList.add(jItem);
             }
         }
     }
