@@ -108,6 +108,9 @@ public class RestServlet extends HttpServlet {
             throws ServletException, IOException {
         // System.out.println(">>> " + req.getPathInfo());
         response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "*");
+        response.setHeader("Cache-Control","no-store");
+        response.setHeader("Vary","*");
 
         response.setCharacterEncoding(MString.CHARSET_UTF_8); // default
 
