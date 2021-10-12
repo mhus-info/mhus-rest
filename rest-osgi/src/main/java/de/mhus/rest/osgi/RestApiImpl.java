@@ -197,6 +197,7 @@ public class RestApiImpl extends AbstractRestApi {
         RestSecurityService s = securityService;
         if (s == null) {
             if (REQUIRE_SECURITY.value()) {
+                log().d("deny access to rest - wait for security");
                 callContext.setResponseStatus(503);
                 return false;
             }
