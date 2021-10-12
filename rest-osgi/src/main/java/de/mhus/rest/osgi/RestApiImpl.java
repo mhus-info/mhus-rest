@@ -195,7 +195,13 @@ public class RestApiImpl extends AbstractRestApi {
     @Override
     public boolean checkSecurity(CallContext callContext) {
         RestSecurityService s = securityService;
-        if (s == null) return true;
+        if (s == null) {
+            if (REQUIRE_SECURITY.value()) {
+                callContext.setResponseStatus(503);
+                return false;
+            }
+            return true;
+        }
         return s.checkSecurity(callContext);
     }
 }

@@ -36,6 +36,7 @@ public abstract class AbstractRestApi extends MLog implements RestApi {
     protected WeakMapList<String, RestSocket> sockets = new WeakMapList<>();
 
     public static final CfgBoolean RELAXED = new CfgBoolean(RestApi.class, "aaaRelaxed", true);
+    public static final CfgBoolean REQUIRE_SECURITY = new CfgBoolean(RestApi.class, "requireSecurity", false);
 
     @Override
     public Map<String, RestNodeService> getRestNodeRegistry() {

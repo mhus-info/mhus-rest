@@ -211,4 +211,10 @@ public class CallContext {
     public boolean isReturnTrace() {
         return returnTrace;
     }
+
+    public void setResponseStatus(int sc) {
+        if (orgResponse == null || !(orgResponse instanceof HttpServletResponse))
+            throw new NotSupportedException("response is not HttpServletResponse");
+        ((HttpServletResponse) orgResponse).setStatus(sc);
+    }
 }
