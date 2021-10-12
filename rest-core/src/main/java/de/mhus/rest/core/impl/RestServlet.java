@@ -108,7 +108,6 @@ public class RestServlet extends HttpServlet {
             throws ServletException, IOException {
         // System.out.println(">>> " + req.getPathInfo());
         response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Methods", "*");
         response.setHeader("Cache-Control","no-store");
         response.setHeader("Vary","*");
 
@@ -251,8 +250,9 @@ public class RestServlet extends HttpServlet {
 
         RestResult res = null;
 
-        if (method.equals(MHttp.METHOD_HEAD)) {
+        if (method.equals(MHttp.METHOD_HEAD) || method.equals(MHttp.METHOD_OPTIONS)) {
             // nothing more to do
+            resp.setHeader("Access-Control-Allow-Methods", "*");
             return null;
         }
 
