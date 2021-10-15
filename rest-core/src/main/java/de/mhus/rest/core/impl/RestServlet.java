@@ -151,6 +151,7 @@ public class RestServlet extends HttpServlet {
                 Tags.SPAN_KIND.set(span, Tags.SPAN_KIND_SERVER);
                 Tags.HTTP_METHOD.set(span, method);
                 Tags.HTTP_URL.set(span, request.getRequestURL().toString());
+                span.setTag("http.remote", request.getRemoteAddr());
                 String pi = request.getPathInfo();
                 if (CFG_TRACE_TAGS.value()) {
                     if (pi != null) {
