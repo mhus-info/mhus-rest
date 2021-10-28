@@ -87,6 +87,7 @@ public class RestServlet extends HttpServlet {
     private int nextId = 0;
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
     private CfgString CFG_TRACE_ACTIVE = new CfgString(getClass(), "traceActivation", "");
+    private CfgBoolean CFG_TRACE_FOLLOW = new CfgBoolean(getClass(), "traceFollow", true);
     private CfgBoolean CFG_TRACE_PATH = new CfgBoolean(getClass(), "tracePath", true);
     private CfgBoolean CFG_TRACE_PARAM = new CfgBoolean(getClass(), "traceParam", true);
     private CfgBoolean CFG_HEADER_TAGS = new CfgBoolean(getClass(), "traceHeader", true);
@@ -129,11 +130,13 @@ public class RestServlet extends HttpServlet {
             }
 
             // tracing
-            SpanContext parentSpanCtx =
-                    ITracer.get()
-                            .tracer()
-                            .extract(Format.Builtin.HTTP_HEADERS, new TraceExtractRest(request));
-
+            SpanContext parentSpanCtx = null;
+            if (CFG_TRACE_FOLLOW.value()) {
+                parentSpanCtx =
+                        ITracer.get()
+                                .tracer()
+                                .extract(Format.Builtin.HTTP_HEADERS, new TraceExtractRest(request));
+            }
             String trace = request.getParameter("_trace");
             if (MString.isEmpty(trace)) trace = CFG_TRACE_ACTIVE.value();
 
@@ -156,7 +159,7 @@ public class RestServlet extends HttpServlet {
                 Tags.SPAN_KIND.set(span, Tags.SPAN_KIND_SERVER);
                 Tags.HTTP_METHOD.set(span, method);
                 Tags.HTTP_URL.set(span, request.getRequestURL().toString());
-                span.setTag("http.remote", request.getRemoteAddr());
+                span.setTag("http.remote", getRemoteAddr(request));
                 String pi = request.getPathInfo();
                 if (CFG_TRACE_PATH.value()) {
                     if (pi != null) {
@@ -307,7 +310,7 @@ public class RestServlet extends HttpServlet {
             // log access
             logAccess(
                     id,
-                    req.getRemoteAddr(),
+                    getRemoteAddr(req),
                     req.getRemotePort(),
                     subject,
                     method,
@@ -385,6 +388,15 @@ public class RestServlet extends HttpServlet {
             return null;
         }
         return null;
+    }
+
+    private String getRemoteAddr(HttpServletRequest req) {
+        if ("127.0.0.1".equals(req.getRemoteAddr())) { // TODO configurable
+            String forward = req.getHeader("X-Forwarded-For");
+            if (forward != null)
+                return forward;
+        }
+        return req.getRemoteAddr();
     }
 
     public boolean isPublicPath(String path) {
