@@ -114,6 +114,7 @@ public class RestServlet extends HttpServlet {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, HEAD, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "*");
+        response.setHeader("Access-Control-Max-Age", "0");
         response.setHeader("Cache-Control","no-store");
         response.setHeader("Vary","*");
 
@@ -197,6 +198,17 @@ public class RestServlet extends HttpServlet {
                 }
             }
 
+            // method
+            String method = request.getParameter("_method");
+            if (method == null) method = request.getMethod();
+            method = method.toUpperCase();
+
+            if (method.equals(MHttp.METHOD_OPTIONS)) {
+                // nothing more to do
+                return;
+            }
+            final String finalMethod = method;
+
             // authenticate - find login token
             AuthenticationToken token = null;
             RestRequest restRequest = new RestRequestWrapper(request);
@@ -208,7 +220,7 @@ public class RestServlet extends HttpServlet {
             // create shiro Subject and execute
             final AuthenticationToken finalToken = token;
             Subject subject = M.l(AccessApi.class).createSubject();
-            subject.execute(() -> serviceInSession(request, response, path, finalToken));
+            subject.execute(() -> serviceInSession(request, response, path, finalMethod, finalToken));
 
         } finally {
             if (scope != null) scope.close();
@@ -219,6 +231,7 @@ public class RestServlet extends HttpServlet {
             HttpServletRequest req,
             HttpServletResponse resp,
             String path,
+            String method,
             AuthenticationToken authToken)
             throws IOException {
 
@@ -228,10 +241,6 @@ public class RestServlet extends HttpServlet {
         long id = newId();
         // subject
         Subject subject = SecurityUtils.getSubject();
-        // method
-        String method = req.getParameter("_method");
-        if (method == null) method = req.getMethod();
-        method = method.toUpperCase();
         // parts of path
         List<String> parts = new LinkedList<String>(Arrays.asList(path.split("/")));
         if (parts.size() == 0) return null;
@@ -285,7 +294,7 @@ public class RestServlet extends HttpServlet {
 
         RestResult res = null;
 
-        if (method.equals(MHttp.METHOD_HEAD) || method.equals(MHttp.METHOD_OPTIONS)) {
+        if (method.equals(MHttp.METHOD_HEAD)) {
             // nothing more to do
             return null;
         }
