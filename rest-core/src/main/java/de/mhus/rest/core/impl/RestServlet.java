@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,9 @@ public class RestServlet extends HttpServlet {
     private int nextId = 0;
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
     private CfgString CFG_TRACE_ACTIVE = new CfgString(getClass(), "traceActivation", "");
-    private CfgBoolean CFG_TRACE_TAGS = new CfgBoolean(getClass(), "traceTags", true);
+    private CfgBoolean CFG_TRACE_PATH = new CfgBoolean(getClass(), "tracePath", true);
+    private CfgBoolean CFG_TRACE_PARAM = new CfgBoolean(getClass(), "traceParam", true);
+    private CfgBoolean CFG_HEADER_TAGS = new CfgBoolean(getClass(), "traceHeader", true);
     private CfgBoolean CFG_TRACE_RETURN = new CfgBoolean(getClass(), "traceReturn", true);
 
     public RestServlet() {
@@ -155,7 +158,7 @@ public class RestServlet extends HttpServlet {
                 Tags.HTTP_URL.set(span, request.getRequestURL().toString());
                 span.setTag("http.remote", request.getRemoteAddr());
                 String pi = request.getPathInfo();
-                if (CFG_TRACE_TAGS.value()) {
+                if (CFG_TRACE_PATH.value()) {
                     if (pi != null) {
                         int i = 0;
                         for (String part : pi.split("/")) {
@@ -163,10 +166,30 @@ public class RestServlet extends HttpServlet {
                             i++;
                         }
                     }
+                }
+                if (CFG_TRACE_PARAM.value()) {
                     Map<String, String[]> map = request.getParameterMap();
                     if (map != null) {
                         for (Map.Entry<String, String[]> me : map.entrySet())
                             span.setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
+                    }
+                }
+                if (CFG_HEADER_TAGS.value()) {
+                    Enumeration<String> enu = request.getHeaderNames();
+                    while (enu.hasMoreElements()) {
+                        String name = enu.nextElement();
+                        Enumeration<String> enu2 = request.getHeaders(name);
+                        StringBuilder sb = null;
+                        while (enu2.hasMoreElements()) {
+                            String value = enu2.nextElement();
+                            if (sb == null) 
+                                sb = new StringBuilder();
+                            else
+                                sb.append(",");
+                            sb.append(value);
+                        }
+                        if (sb != null)
+                            span.setTag("header_" + name, sb.toString());
                     }
                 }
             }
@@ -226,13 +249,19 @@ public class RestServlet extends HttpServlet {
             return onLoginFailure(req, resp, id);
         }
 
+        Map<String, String[]> parameters = req.getParameterMap();
+        // check for payload and overlay parameters
+        // TODO implement payload
+//        String body = req.getReader().lines()
+//                .reduce("", (accumulator, actual) -> accumulator + actual);
+        
         // create call context object
         CallContext callContext =
                 new CallContext(
                         req,
                         resp,
                         new CachedRestRequest(
-                                req.getParameterMap(),
+                                parameters,
                                 null,
                                 new Provider<InputStream>() {
 
