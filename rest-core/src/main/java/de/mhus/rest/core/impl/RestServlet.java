@@ -120,6 +120,9 @@ public class RestServlet extends HttpServlet {
 
         response.setCharacterEncoding(MString.CHARSET_UTF_8); // default
 
+        final RestApi restService = getRestService();
+        if (!restService.checkSecurityPre(request, response)) return;
+
         Scope scope = null;
         try {
 
@@ -220,7 +223,7 @@ public class RestServlet extends HttpServlet {
             // create shiro Subject and execute
             final AuthenticationToken finalToken = token;
             Subject subject = M.l(AccessApi.class).createSubject();
-            subject.execute(() -> serviceInSession(request, response, path, finalMethod, finalToken));
+            subject.execute(() -> serviceInSession(request, response, path, finalMethod, finalToken, restService));
 
         } finally {
             if (scope != null) scope.close();
@@ -232,7 +235,9 @@ public class RestServlet extends HttpServlet {
             HttpServletResponse resp,
             String path,
             String method,
-            AuthenticationToken authToken)
+            AuthenticationToken authToken,
+            RestApi restService
+            )
             throws IOException {
 
         M.l(AccessApi.class).updateSessionLastAccessTime();
@@ -290,8 +295,6 @@ public class RestServlet extends HttpServlet {
                         MHttp.toMethod(method),
                         CFG_TRACE_RETURN.value());
 
-        RestApi restService = getRestService();
-
         RestResult res = null;
 
         if (method.equals(MHttp.METHOD_HEAD)) {
@@ -300,7 +303,7 @@ public class RestServlet extends HttpServlet {
         }
 
         try {
-            if (!restService.checkSecurity(callContext)) return null;
+            if (!restService.checkSecurityPost(callContext)) return null;
 
             Node item = restService.lookup(parts, null, callContext);
 

@@ -129,6 +129,9 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
         try {
 
+            RestApi restService = getRestService();
+            if (!restService.checkSecurityPre(socket, session)) return;
+
             session.setIdleTimeout(CFG_IDLE_TIMEOUT.value());
 
             UpgradeRequest request = session.getUpgradeRequest();
@@ -260,7 +263,10 @@ public class RestWebSocketServlet extends WebSocketServlet {
         socket.context = callContext;
         RestApi restService = getRestService();
 
+        if (!restService.checkSecurityPost(callContext)) return;
+
         try {
+
             Node item = restService.lookup(parts, null, callContext);
 
             if (item == null || !item.streamingAccept(socket)) {

@@ -15,6 +15,8 @@
  */
 package de.mhus.rest.osgi;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.framework.BundleContext;
@@ -193,7 +195,7 @@ public class RestApiImpl extends AbstractRestApi {
     }
 
     @Override
-    public boolean checkSecurity(CallContext callContext) {
+    public boolean checkSecurityPost(CallContext callContext) {
         RestSecurityService s = securityService;
         if (s == null) {
             if (REQUIRE_SECURITY.value()) {
@@ -203,6 +205,25 @@ public class RestApiImpl extends AbstractRestApi {
             }
             return true;
         }
-        return s.checkSecurity(callContext);
+        return s.checkSecurityPost(callContext);
+    }
+
+    @Override
+    public boolean checkSecurityPre(Object request, Object response) {
+        RestSecurityService s = securityService;
+        if (s == null) {
+            if (REQUIRE_SECURITY.value()) {
+                log().d("deny access to rest - wait for security");
+                if (response instanceof HttpServletResponse)
+                    try {
+                        ((HttpServletResponse)response).sendError(503);
+                    } catch (IOException e) {
+                        log().d(e);
+                    }
+                return false;
+            }
+            return true;
+        }
+        return s.checkSecurityPre(request, response);
     }
 }

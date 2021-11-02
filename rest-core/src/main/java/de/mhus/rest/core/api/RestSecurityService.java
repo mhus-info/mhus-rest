@@ -19,5 +19,7 @@ import de.mhus.rest.core.CallContext;
 
 public interface RestSecurityService {
 
-    boolean checkSecurity(CallContext callContext);
+    boolean checkSecurityPost(CallContext callContext);
+
+    boolean checkSecurityPre(Object request, Object response);
 }

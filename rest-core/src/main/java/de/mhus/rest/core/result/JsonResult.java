@@ -60,7 +60,7 @@ public class JsonResult implements RestResult {
             Subject subject = SecurityUtils.getSubject();
             if (subject.isAuthenticated())
                 ((ObjectNode) json).put("_user", String.valueOf(subject.getPrincipal()));
-            if (context.isReturnTrace() && ITracer.get().current() != null)
+            if (context != null && context.isReturnTrace() && ITracer.get().current() != null)
                 try {
                     ITracer.get()
                             .tracer()

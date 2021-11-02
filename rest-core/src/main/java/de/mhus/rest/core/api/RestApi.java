@@ -47,5 +47,25 @@ public interface RestApi {
 
     void checkPermission(Node item, String string, CallContext callContext);
 
-    boolean checkSecurity(CallContext callContext);
+    /**
+     * Check access security after preparing the request for processing. For web requests and
+     * web socket requests.
+     * 
+     * If the request is denied the response must be set by the function.
+     * 
+     * @param callContext The context of the call
+     * @return true if the request is allowed
+     */
+    boolean checkSecurityPost(CallContext callContext);
+
+    /**
+     * Check access security before processing the request for web requests and web socket connects.
+     * 
+     * If the request is denied the response must be set by the function.
+     * 
+     * @param request HttpServletRequest or RestWebSocket
+     * @param response HttpServletResponse or Session
+     * @return true if the request is allowed
+     */
+    boolean checkSecurityPre(Object request, Object response);
 }
