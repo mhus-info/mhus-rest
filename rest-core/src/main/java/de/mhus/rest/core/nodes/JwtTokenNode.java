@@ -59,7 +59,7 @@ public class JwtTokenNode extends VoidNode {
         if (MString.isSet(CFG_ROLE_FILTER.value())) {
             ArrayNode roles = MJson.createArrayNode();
             obj.set("roles", roles);
-            for (String role : Aaa.getRoles(Aaa.getSubject()))
+            for (String role : Aaa.getRoles(Aaa.getPrincipal()))
                 if (role.matches(CFG_ROLE_FILTER.value()))
                     roles.add(role);
         }
