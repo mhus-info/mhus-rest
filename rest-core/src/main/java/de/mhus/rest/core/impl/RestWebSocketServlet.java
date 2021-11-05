@@ -130,7 +130,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
         try {
 
             RestApi restService = getRestService();
-            if (!restService.checkSecurityPre(socket, session)) return;
+            if (!restService.checkSecurityRequest(socket, session)) return;
 
             session.setIdleTimeout(CFG_IDLE_TIMEOUT.value());
 
@@ -263,7 +263,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
         socket.context = callContext;
         RestApi restService = getRestService();
 
-        if (!restService.checkSecurityPost(callContext)) return;
+        if (!restService.checkSecurityPrepared(callContext)) return;
 
         try {
 

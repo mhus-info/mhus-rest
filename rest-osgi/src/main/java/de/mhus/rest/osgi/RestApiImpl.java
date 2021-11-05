@@ -33,6 +33,7 @@ import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
+import de.mhus.rest.core.api.RestResult;
 import de.mhus.rest.core.api.RestSecurityService;
 import de.mhus.rest.core.impl.AbstractRestApi;
 
@@ -195,7 +196,7 @@ public class RestApiImpl extends AbstractRestApi {
     }
 
     @Override
-    public boolean checkSecurityPost(CallContext callContext) {
+    public boolean checkSecurityPrepared(CallContext callContext) {
         RestSecurityService s = securityService;
         if (s == null) {
             if (REQUIRE_SECURITY.value()) {
@@ -205,11 +206,11 @@ public class RestApiImpl extends AbstractRestApi {
             }
             return true;
         }
-        return s.checkSecurityPost(callContext);
+        return s.checkSecurityPrepared(callContext);
     }
 
     @Override
-    public boolean checkSecurityPre(Object request, Object response) {
+    public boolean checkSecurityRequest(Object request, Object response) {
         RestSecurityService s = securityService;
         if (s == null) {
             if (REQUIRE_SECURITY.value()) {
@@ -224,6 +225,21 @@ public class RestApiImpl extends AbstractRestApi {
             }
             return true;
         }
-        return s.checkSecurityPre(request, response);
+        return s.checkSecurityRequest(request, response);
     }
+
+    @Override
+    public boolean checkSecurityResult(CallContext callContext, RestResult result) {
+        RestSecurityService s = securityService;
+        if (s == null) {
+            if (REQUIRE_SECURITY.value()) {
+                log().d("deny access to rest - wait for security");
+                callContext.setResponseStatus(503);
+                return false;
+            }
+            return true;
+        }
+        return s.checkSecurityResult(callContext, result);
+    }
+
 }

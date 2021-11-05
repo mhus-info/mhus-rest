@@ -56,7 +56,7 @@ public interface RestApi {
      * @param callContext The context of the call
      * @return true if the request is allowed
      */
-    boolean checkSecurityPost(CallContext callContext);
+    boolean checkSecurityPrepared(CallContext callContext);
 
     /**
      * Check access security before processing the request for web requests and web socket connects.
@@ -67,5 +67,15 @@ public interface RestApi {
      * @param response HttpServletResponse or Session
      * @return true if the request is allowed
      */
-    boolean checkSecurityPre(Object request, Object response);
+    boolean checkSecurityRequest(Object request, Object response);
+
+    /**
+     * Check security after processing the request. The result could be manipulated if necesary.
+     * 
+     * @param callContext The context of the call
+     * @param result The result or the request
+     * @return true if the request is allowed
+     */
+    boolean checkSecurityResult(CallContext callContext, RestResult result);
+
 }

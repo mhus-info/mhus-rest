@@ -121,7 +121,10 @@ public class RestServlet extends HttpServlet {
         response.setCharacterEncoding(MString.CHARSET_UTF_8); // default
 
         final RestApi restService = getRestService();
-        if (!restService.checkSecurityPre(request, response)) return;
+        if (!restService.checkSecurityRequest(request, response)) {
+            log.d("request blocked by security");
+            return;
+        }
 
         Scope scope = null;
         try {
@@ -303,7 +306,10 @@ public class RestServlet extends HttpServlet {
         }
 
         try {
-            if (!restService.checkSecurityPost(callContext)) return null;
+            if (!restService.checkSecurityPrepared(callContext)) {
+                log.d("request blocked by security",id, path);
+                return null;
+            }
 
             Node item = restService.lookup(parts, null, callContext);
 
@@ -360,6 +366,10 @@ public class RestServlet extends HttpServlet {
             try {
                 if (res != null) {
                     //                    resp.setHeader("Encapsulated", "result");
+                    if (!restService.checkSecurityResult(callContext, res)) {
+                        log.d("result blocked by security",id, res);
+                        return null;
+                    }
                     log.d("result", id, res);
                     int rc = res.getReturnCode();
                     if (rc < 0) resp.setStatus(-rc);
