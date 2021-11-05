@@ -48,7 +48,12 @@ public class JwtTokenNode extends VoidNode {
             result.createObjectNode().put("rc", -1);
             return;
         }
-        String token = Aaa.createBearerToken(subject, null, config);
+        
+        BearerConfiguration c = config;
+        long timeout = callContext.getParameter("timeout", 0);
+        if (timeout > 0 && timeout < config.getTimeout())
+            c = new BearerConfiguration(timeout);
+        String token = Aaa.createBearerToken(subject, null, c);
         if (token == null) {
             result.createObjectNode().put("rc", -2);
             return;
