@@ -78,4 +78,12 @@ public interface RestApi {
      */
     boolean checkSecurityResult(CallContext callContext, RestResult result);
 
+    /**
+     * Return the real remote address.
+     * 
+     * @param request HttpServletRequest or RestWebSocket
+     * @return Remote IP
+     */
+    String getRemoteAddress(Object request);
+    
 }

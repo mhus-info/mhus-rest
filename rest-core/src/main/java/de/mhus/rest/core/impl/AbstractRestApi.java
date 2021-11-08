@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import javax.servlet.http.HttpServletRequest;
+
 import de.mhus.lib.core.MLog;
 import de.mhus.lib.core.cfg.CfgBoolean;
 import de.mhus.lib.core.util.WeakMapList;
@@ -108,4 +110,35 @@ public abstract class AbstractRestApi extends MLog implements RestApi {
         if (list == null) return 0;
         return list.size();
     }
+    
+    @Override
+    public String getRemoteAddress(Object request) {
+        if (request instanceof HttpServletRequest) {
+            HttpServletRequest req = (HttpServletRequest)request;
+            String remote = req.getRemoteAddr();
+            remote = remoteAddressMapping(req, remote);
+            return remote;
+        }
+//        if (request instanceof RestWebSocket) {
+//            RestWebSocket req1 = (RestWebSocket)request;
+//            Object req2 = req1.getContext().getOriginalRequest();
+//            if (req2 != null && req2 instanceof HttpServletRequest) { // maybe not correct, it's UpgradeRequest
+//                HttpServletRequest req3 = (HttpServletRequest)req2;
+//                String remote = req3.getRemoteAddr();
+//                remote = remoteAddressMapping(req3, remote);
+//                return remote;
+//            }
+//        }
+        return null;
+    }
+
+    protected String remoteAddressMapping(HttpServletRequest request, String remote) {
+        if (remote.equals("127.0.0.1")) {
+            String forward = request.getHeader("X-Forwarded-For");
+            if (forward != null)
+                return forward;
+        }
+        return remote;
+    }
+
 }

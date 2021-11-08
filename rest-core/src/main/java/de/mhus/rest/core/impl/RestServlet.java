@@ -166,7 +166,7 @@ public class RestServlet extends HttpServlet {
                 Tags.SPAN_KIND.set(span, Tags.SPAN_KIND_SERVER);
                 Tags.HTTP_METHOD.set(span, method);
                 Tags.HTTP_URL.set(span, request.getRequestURL().toString());
-                span.setTag("http.remote", getRemoteAddr(request));
+                span.setTag("http.remote", getRestService().getRemoteAddress(request));
                 String pi = request.getPathInfo();
                 if (CFG_TRACE_PATH.value()) {
                     if (pi != null) {
@@ -328,7 +328,7 @@ public class RestServlet extends HttpServlet {
             // log access
             logAccess(
                     id,
-                    getRemoteAddr(req),
+                    getRestService().getRemoteAddress(req),
                     req.getRemotePort(),
                     subject,
                     method,
@@ -410,15 +410,6 @@ public class RestServlet extends HttpServlet {
             return null;
         }
         return null;
-    }
-
-    private String getRemoteAddr(HttpServletRequest req) {
-        if ("127.0.0.1".equals(req.getRemoteAddr())) { // TODO configurable
-            String forward = req.getHeader("X-Forwarded-For");
-            if (forward != null)
-                return forward;
-        }
-        return req.getRemoteAddr();
     }
 
     public boolean isPublicPath(String path) {

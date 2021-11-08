@@ -16,7 +16,6 @@
 package de.mhus.rest.core.impl;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -279,9 +278,11 @@ public class RestWebSocketServlet extends WebSocketServlet {
             getRestService().register(socket);
 
             // log access
+            String remote = getRestService().getRemoteAddress(socket);
+            if (remote == null) remote = session.getRemoteAddress().getHostName();
             logAccess(
                     id,
-                    session.getRemoteAddress(),
+                    remote,
                     subject,
                     session.getUpgradeRequest().getRequestURI(),
                     session.getUpgradeRequest().getParameterMap());
@@ -301,7 +302,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
 
     private void logAccess(
             long id,
-            InetSocketAddress remoteAddress,
+            String remoteAddress,
             Subject subject,
             URI requestURI,
             Map<String, List<String>> parameterMap) {
@@ -310,9 +311,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
                 "access",
                 id,
                 "\n Remote: "
-                        + remoteAddress.getHostString()
-                        + ":"
-                        + remoteAddress.getPort()
+                        + remoteAddress
                         + "\n Subject: "
                         + subject
                         + "\n Request: "
