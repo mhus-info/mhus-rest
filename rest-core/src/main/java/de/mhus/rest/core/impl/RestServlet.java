@@ -115,8 +115,8 @@ public class RestServlet extends HttpServlet {
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, HEAD, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "*");
         response.setHeader("Access-Control-Max-Age", "0");
-        response.setHeader("Cache-Control","no-store");
-        response.setHeader("Vary","*");
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader("Vary", "*");
 
         response.setCharacterEncoding(MString.CHARSET_UTF_8); // default
 
@@ -142,7 +142,8 @@ public class RestServlet extends HttpServlet {
                 parentSpanCtx =
                         ITracer.get()
                                 .tracer()
-                                .extract(Format.Builtin.HTTP_HEADERS, new TraceExtractRest(request));
+                                .extract(
+                                        Format.Builtin.HTTP_HEADERS, new TraceExtractRest(request));
             }
             String trace = request.getParameter("_trace");
             if (MString.isEmpty(trace)) trace = CFG_TRACE_ACTIVE.value();
@@ -192,14 +193,11 @@ public class RestServlet extends HttpServlet {
                         StringBuilder sb = null;
                         while (enu2.hasMoreElements()) {
                             String value = enu2.nextElement();
-                            if (sb == null) 
-                                sb = new StringBuilder();
-                            else
-                                sb.append(",");
+                            if (sb == null) sb = new StringBuilder();
+                            else sb.append(",");
                             sb.append(value);
                         }
-                        if (sb != null)
-                            span.setTag("header_" + name, sb.toString());
+                        if (sb != null) span.setTag("header_" + name, sb.toString());
                     }
                 }
             }
@@ -226,7 +224,10 @@ public class RestServlet extends HttpServlet {
             // create shiro Subject and execute
             final AuthenticationToken finalToken = token;
             Subject subject = M.l(AccessApi.class).createSubject();
-            subject.execute(() -> serviceInSession(request, response, path, finalMethod, finalToken, restService));
+            subject.execute(
+                    () ->
+                            serviceInSession(
+                                    request, response, path, finalMethod, finalToken, restService));
 
         } finally {
             if (scope != null) scope.close();
@@ -239,8 +240,7 @@ public class RestServlet extends HttpServlet {
             String path,
             String method,
             AuthenticationToken authToken,
-            RestApi restService
-            )
+            RestApi restService)
             throws IOException {
 
         M.l(AccessApi.class).updateSessionLastAccessTime();
@@ -272,9 +272,9 @@ public class RestServlet extends HttpServlet {
         Map<String, String[]> parameters = req.getParameterMap();
         // check for payload and overlay parameters
         // TODO implement payload
-//        String body = req.getReader().lines()
-//                .reduce("", (accumulator, actual) -> accumulator + actual);
-        
+        //        String body = req.getReader().lines()
+        //                .reduce("", (accumulator, actual) -> accumulator + actual);
+
         // create call context object
         CallContext callContext =
                 new CallContext(
@@ -307,7 +307,7 @@ public class RestServlet extends HttpServlet {
 
         try {
             if (!restService.checkSecurityPrepared(callContext)) {
-                log.d("request blocked by security",id, path);
+                log.d("request blocked by security", id, path);
                 return null;
             }
 
@@ -367,7 +367,7 @@ public class RestServlet extends HttpServlet {
                 if (res != null) {
                     //                    resp.setHeader("Encapsulated", "result");
                     if (!restService.checkSecurityResult(callContext, res)) {
-                        log.d("result blocked by security",id, res);
+                        log.d("result blocked by security", id, res);
                         return null;
                     }
                     log.d("result", id, res);

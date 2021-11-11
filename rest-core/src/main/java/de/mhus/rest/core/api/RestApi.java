@@ -48,11 +48,11 @@ public interface RestApi {
     void checkPermission(Node item, String string, CallContext callContext);
 
     /**
-     * Check access security after preparing the request for processing. For web requests and
-     * web socket requests.
-     * 
-     * If the request is denied the response must be set by the function.
-     * 
+     * Check access security after preparing the request for processing. For web requests and web
+     * socket requests.
+     *
+     * <p>If the request is denied the response must be set by the function.
+     *
      * @param callContext The context of the call
      * @return true if the request is allowed
      */
@@ -60,9 +60,9 @@ public interface RestApi {
 
     /**
      * Check access security before processing the request for web requests and web socket connects.
-     * 
-     * If the request is denied the response must be set by the function.
-     * 
+     *
+     * <p>If the request is denied the response must be set by the function.
+     *
      * @param request HttpServletRequest or RestWebSocket
      * @param response HttpServletResponse or Session
      * @return true if the request is allowed
@@ -71,7 +71,7 @@ public interface RestApi {
 
     /**
      * Check security after processing the request. The result could be manipulated if necesary.
-     * 
+     *
      * @param callContext The context of the call
      * @param result The result or the request
      * @return true if the request is allowed
@@ -80,10 +80,9 @@ public interface RestApi {
 
     /**
      * Return the real remote address.
-     * 
+     *
      * @param request HttpServletRequest or RestWebSocket
      * @return Remote IP
      */
     String getRemoteAddress(Object request);
-    
 }

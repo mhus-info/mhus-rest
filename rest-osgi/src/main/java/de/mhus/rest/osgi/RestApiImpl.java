@@ -217,7 +217,7 @@ public class RestApiImpl extends AbstractRestApi {
                 log().d("deny access to rest - wait for security");
                 if (response instanceof HttpServletResponse)
                     try {
-                        ((HttpServletResponse)response).sendError(503);
+                        ((HttpServletResponse) response).sendError(503);
                     } catch (IOException e) {
                         log().d(e);
                     }
@@ -241,5 +241,4 @@ public class RestApiImpl extends AbstractRestApi {
         }
         return s.checkSecurityResult(callContext, result);
     }
-
 }

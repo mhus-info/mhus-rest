@@ -24,5 +24,4 @@ public interface RestSecurityService {
     boolean checkSecurityRequest(Object request, Object response);
 
     boolean checkSecurityResult(CallContext callContext, RestResult result);
-
 }

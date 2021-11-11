@@ -48,11 +48,10 @@ public class JwtTokenNode extends VoidNode {
             result.createObjectNode().put("rc", -1);
             return;
         }
-        
+
         BearerConfiguration c = config;
         long timeout = callContext.getParameter("timeout", 0);
-        if (timeout > 0 && timeout < config.getTimeout())
-            c = new BearerConfiguration(timeout);
+        if (timeout > 0 && timeout < config.getTimeout()) c = new BearerConfiguration(timeout);
         String token = Aaa.createBearerToken(subject, null, c);
         if (token == null) {
             result.createObjectNode().put("rc", -2);
@@ -65,8 +64,7 @@ public class JwtTokenNode extends VoidNode {
             ArrayNode roles = MJson.createArrayNode();
             obj.set("roles", roles);
             for (String role : Aaa.getRoles(Aaa.getPrincipal()))
-                if (role.matches(CFG_ROLE_FILTER.value()))
-                    roles.add(role);
+                if (role.matches(CFG_ROLE_FILTER.value())) roles.add(role);
         }
     }
 }
