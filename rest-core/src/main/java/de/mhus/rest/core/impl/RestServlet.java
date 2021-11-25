@@ -189,13 +189,20 @@ public class RestServlet extends HttpServlet {
                     Enumeration<String> enu = request.getHeaderNames();
                     while (enu.hasMoreElements()) {
                         String name = enu.nextElement();
-                        Enumeration<String> enu2 = request.getHeaders(name);
                         StringBuilder sb = null;
-                        while (enu2.hasMoreElements()) {
-                            String value = enu2.nextElement();
-                            if (sb == null) sb = new StringBuilder();
-                            else sb.append(",");
-                            sb.append(value);
+                        if ("Authorization".equals(name)) {
+                            sb = new StringBuilder();
+                            String v = MString.beforeIndex(request.getHeader(name), ' ');
+                            sb.append(v);
+                            sb.append(" ***");
+                        } else {
+                            Enumeration<String> enu2 = request.getHeaders(name);
+                            while (enu2.hasMoreElements()) {
+                                String value = enu2.nextElement();
+                                if (sb == null) sb = new StringBuilder();
+                                else sb.append(",");
+                                sb.append(value);
+                            }
                         }
                         if (sb != null) span.setTag("header_" + name, sb.toString());
                     }
