@@ -39,7 +39,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.mhus.lib.annotations.service.ServiceComponent;
+import de.mhus.lib.core.IReadProperties;
 import de.mhus.lib.core.M;
+import de.mhus.lib.core.MJson;
 import de.mhus.lib.core.MString;
 import de.mhus.lib.core.aaa.Aaa;
 import de.mhus.lib.core.aaa.AccessApi;
@@ -328,6 +330,7 @@ public class RestServlet extends HttpServlet {
                         HttpServletResponse.SC_NOT_FOUND,
                         "Resource Not Found",
                         null,
+                        null,
                         subject);
                 return null;
             }
@@ -366,7 +369,7 @@ public class RestServlet extends HttpServlet {
 
             if (res == null) {
                 sendError(
-                        id, req, resp, HttpServletResponse.SC_NOT_IMPLEMENTED, null, null, subject);
+                        id, req, resp, HttpServletResponse.SC_NOT_IMPLEMENTED, null, null, null, subject);
                 return null;
             }
 
@@ -392,17 +395,18 @@ public class RestServlet extends HttpServlet {
                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                         t.getMessage(),
                         t,
+                        null,
                         subject);
                 return null;
             }
 
         } catch (AccessDeniedException e) {
             log.d(e);
-            sendError(id, req, resp, 404, e.getMessage(), e, subject);
+            sendError(id, req, resp, 404, e.getMessage(), e, null, subject);
             return null;
         } catch (RestException t) {
             log.d(t);
-            sendError(id, req, resp, t.getErrorId(), t.getMessage(), t, subject);
+            sendError(id, req, resp, t.getErrorId(), t.getMessage(), t, ((RestException)t).getParameters(), subject);
             return null;
         } catch (Throwable t) {
             log.d(t);
@@ -413,6 +417,7 @@ public class RestServlet extends HttpServlet {
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     t.getMessage(),
                     t,
+                    null,
                     subject);
             return null;
         }
@@ -432,7 +437,7 @@ public class RestServlet extends HttpServlet {
             throws IOException {
 
         resp.setHeader("WWW-Authenticate", "BASIC realm=\"rest\"");
-        sendError(id, req, resp, HttpServletResponse.SC_UNAUTHORIZED, e.getMessage(), e, null);
+        sendError(id, req, resp, HttpServletResponse.SC_UNAUTHORIZED, e.getMessage(), e, null, null);
         return null;
     }
 
@@ -440,7 +445,7 @@ public class RestServlet extends HttpServlet {
             throws IOException {
 
         resp.setHeader("WWW-Authenticate", "BASIC realm=\"rest\"");
-        sendError(id, req, resp, HttpServletResponse.SC_UNAUTHORIZED, "", null, null);
+        sendError(id, req, resp, HttpServletResponse.SC_UNAUTHORIZED, "", null, null, null);
         return null;
     }
 
@@ -510,6 +515,7 @@ public class RestServlet extends HttpServlet {
             int errNr,
             String errMsg,
             Throwable t,
+            IReadProperties parameters,
             Subject user)
             throws IOException {
 
@@ -534,6 +540,8 @@ public class RestServlet extends HttpServlet {
             ObjectMapper m = new ObjectMapper();
 
             ObjectNode json = m.createObjectNode();
+            if (parameters != null)
+                parameters.forEach(entry -> MJson.setValue(json, entry.getKey(), entry.getValue()) );
             json.put("_timestamp", System.currentTimeMillis());
             json.put("_sequence", id);
             if (user != null) json.put("_user", String.valueOf(user.getPrincipal()));
