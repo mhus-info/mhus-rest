@@ -184,7 +184,7 @@ public class RestServlet extends HttpServlet {
                     Map<String, String[]> map = request.getParameterMap();
                     if (map != null) {
                         for (Map.Entry<String, String[]> me : map.entrySet())
-                            span.setTag("param_" + me.getKey(), Arrays.toString(me.getValue()));
+                            span.setTag("param_" + me.getKey(), arrayToString(me.getValue()));
                     }
                 }
                 if (CFG_HEADER_TAGS.value()) {
@@ -241,6 +241,13 @@ public class RestServlet extends HttpServlet {
         } finally {
             if (scope != null) scope.close();
         }
+    }
+
+    private String arrayToString(String[] value) {
+        if (value == null) return "null";
+        if (value.length == 0) return "";
+        if (value.length == 1) return value[0];
+        return Arrays.toString(value);
     }
 
     private Object serviceInSession(

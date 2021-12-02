@@ -137,7 +137,12 @@ public abstract class AbstractRestApi extends MLog implements RestApi {
     protected String remoteAddressMapping(HttpServletRequest request, String remote) {
         if (remote.equals("127.0.0.1")) {
             String forward = request.getHeader("X-Forwarded-For");
-            if (forward != null) return forward;
+            if (forward != null) {
+                int pos = forward.indexOf(',');
+                if (pos > 0)
+                    forward = forward.substring(0, pos);
+                return forward;
+            }
         }
         return remote;
     }
