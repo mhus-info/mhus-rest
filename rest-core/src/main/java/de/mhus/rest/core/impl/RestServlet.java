@@ -376,7 +376,14 @@ public class RestServlet extends HttpServlet {
 
             if (res == null) {
                 sendError(
-                        id, req, resp, HttpServletResponse.SC_NOT_IMPLEMENTED, null, null, null, subject);
+                        id,
+                        req,
+                        resp,
+                        HttpServletResponse.SC_NOT_IMPLEMENTED,
+                        null,
+                        null,
+                        null,
+                        subject);
                 return null;
             }
 
@@ -413,7 +420,15 @@ public class RestServlet extends HttpServlet {
             return null;
         } catch (RestException t) {
             log.d(t);
-            sendError(id, req, resp, t.getErrorId(), t.getMessage(), t, ((RestException)t).getParameters(), subject);
+            sendError(
+                    id,
+                    req,
+                    resp,
+                    t.getErrorId(),
+                    t.getMessage(),
+                    t,
+                    ((RestException) t).getParameters(),
+                    subject);
             return null;
         } catch (Throwable t) {
             log.d(t);
@@ -444,7 +459,8 @@ public class RestServlet extends HttpServlet {
             throws IOException {
 
         resp.setHeader("WWW-Authenticate", "BASIC realm=\"rest\"");
-        sendError(id, req, resp, HttpServletResponse.SC_UNAUTHORIZED, e.getMessage(), e, null, null);
+        sendError(
+                id, req, resp, HttpServletResponse.SC_UNAUTHORIZED, e.getMessage(), e, null, null);
         return null;
     }
 
@@ -548,7 +564,7 @@ public class RestServlet extends HttpServlet {
 
             ObjectNode json = m.createObjectNode();
             if (parameters != null)
-                parameters.forEach(entry -> MJson.setValue(json, entry.getKey(), entry.getValue()) );
+                parameters.forEach(entry -> MJson.setValue(json, entry.getKey(), entry.getValue()));
             json.put("_timestamp", System.currentTimeMillis());
             json.put("_sequence", id);
             if (user != null) json.put("_user", String.valueOf(user.getPrincipal()));

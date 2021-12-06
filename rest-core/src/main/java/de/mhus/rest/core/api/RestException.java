@@ -38,9 +38,8 @@ public class RestException extends MException {
     public int getErrorId() {
         return errId;
     }
-    
+
     public IReadProperties getParameters() {
         return param;
     }
-    
 }

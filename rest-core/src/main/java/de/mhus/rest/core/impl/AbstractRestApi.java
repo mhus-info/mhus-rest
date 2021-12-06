@@ -139,8 +139,7 @@ public abstract class AbstractRestApi extends MLog implements RestApi {
             String forward = request.getHeader("X-Forwarded-For");
             if (forward != null) {
                 int pos = forward.indexOf(',');
-                if (pos > 0)
-                    forward = forward.substring(0, pos);
+                if (pos > 0) forward = forward.substring(0, pos);
                 return forward;
             }
         }
