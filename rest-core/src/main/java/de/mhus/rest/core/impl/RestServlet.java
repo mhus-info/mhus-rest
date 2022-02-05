@@ -53,6 +53,8 @@ import de.mhus.lib.core.logging.Log;
 import de.mhus.lib.core.logging.TraceJsonMap;
 import de.mhus.lib.core.util.Provider;
 import de.mhus.lib.errors.AccessDeniedException;
+import de.mhus.lib.errors.MException;
+import de.mhus.lib.errors.MRuntimeException;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestAuthenticator;
 import de.mhus.rest.core.RestAuthenticatorByBasicAuth;
@@ -424,12 +426,34 @@ public class RestServlet extends HttpServlet {
                     id,
                     req,
                     resp,
-                    t.getErrorId(),
+                    t.getReturnCode(),
                     t.getMessage(),
                     t,
-                    ((RestException) t).getParameters(),
+                    t.getParameters(),
                     subject);
             return null;
+        } catch (MException t) {
+            log.d(t);
+            sendError(
+                    id,
+                    req,
+                    resp,
+                    t.getReturnCode(),
+                    t.getMessage(),
+                    t,
+                    null,
+                    subject);
+        } catch (MRuntimeException t) {
+            log.d(t);
+            sendError(
+                    id,
+                    req,
+                    resp,
+                    t.getReturnCode(),
+                    t.getMessage(),
+                    t,
+                    null,
+                    subject);
         } catch (Throwable t) {
             log.d(t);
             sendError(

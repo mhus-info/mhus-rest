@@ -17,11 +17,9 @@ package de.mhus.rest.core.node;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import de.mhus.lib.core.operation.OperationResult;
 import de.mhus.lib.errors.MException;
 import de.mhus.lib.errors.NotFoundException;
 import de.mhus.rest.core.CallContext;
-import de.mhus.rest.core.api.RestException;
 import de.mhus.rest.core.result.JsonResult;
 import de.mhus.rest.core.transform.ObjectTransformer;
 
@@ -60,7 +58,7 @@ public abstract class SingleObjectNode<T> extends JsonSingleNode<T> {
     @Override
     protected void doUpdate(JsonResult result, CallContext callContext) throws Exception {
         T obj = getObjectFromContext(callContext);
-        if (obj == null) throw new RestException(OperationResult.NOT_FOUND);
+        if (obj == null) throw new NotFoundException();
 
         doUpdate(obj, callContext);
         doPrepareForOutput(obj, callContext, false);

@@ -15,28 +15,22 @@
  */
 package de.mhus.rest.core.api;
 
+import de.mhus.lib.basics.RC;
 import de.mhus.lib.core.IReadProperties;
 import de.mhus.lib.errors.MException;
 
 public class RestException extends MException {
 
     private static final long serialVersionUID = 1L;
-    private int errId;
     private IReadProperties param;
 
-    public RestException(String msg, int errId, IReadProperties param) {
-        super(msg);
-        this.errId = errId;
+    public RestException(String msg, int rc, IReadProperties param) {
+        super(rc, msg);
         this.param = param;
     }
 
-    public RestException(int errId, Object... in) {
-        super(in);
-        this.errId = errId;
-    }
-
-    public int getErrorId() {
-        return errId;
+    public RestException(int rc, Object... in) {
+        super(rc, RC.toString(rc), in);
     }
 
     public IReadProperties getParameters() {

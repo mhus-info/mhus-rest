@@ -51,6 +51,8 @@ import de.mhus.lib.core.cfg.CfgString;
 import de.mhus.lib.core.io.http.MHttp;
 import de.mhus.lib.core.logging.ITracer;
 import de.mhus.lib.core.logging.Log;
+import de.mhus.lib.errors.MException;
+import de.mhus.lib.errors.MRuntimeException;
 import de.mhus.rest.core.CallContext;
 import de.mhus.rest.core.RestAuthenticator;
 import de.mhus.rest.core.RestAuthenticatorByBasicAuth;
@@ -59,7 +61,6 @@ import de.mhus.rest.core.RestAuthenticatorByTicket;
 import de.mhus.rest.core.RestRequest;
 import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
-import de.mhus.rest.core.api.RestException;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
@@ -287,9 +288,13 @@ public class RestWebSocketServlet extends WebSocketServlet {
                     session.getUpgradeRequest().getRequestURI(),
                     session.getUpgradeRequest().getParameterMap());
 
-        } catch (RestException t) {
+        } catch (MException t) {
             log.d(t);
-            onError(socket, null, t.getErrorId(), t.getMessage(), true);
+            onError(socket, null, t.getReturnCode(), t.getMessage(), true);
+            return;
+        } catch (MRuntimeException t) {
+            log.d(t);
+            onError(socket, null, t.getReturnCode(), t.getMessage(), true);
             return;
         } catch (Throwable t) {
             log.d(t);
