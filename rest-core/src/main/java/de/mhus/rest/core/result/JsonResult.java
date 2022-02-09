@@ -69,7 +69,7 @@ public class JsonResult implements RestResult {
                                     Format.Builtin.TEXT_MAP,
                                     new TraceJsonMap((ObjectNode) json, "_"));
                 } catch (Throwable t2) {
-                    MLogUtil.log().d(getClass(), t2);
+                    MLogUtil.log().d("tracer failed", getClass(), t2);
                 }
         }
 

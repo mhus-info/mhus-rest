@@ -36,7 +36,7 @@ public class PojoTransformer extends MLog implements ObjectTransformer {
         try {
             MPojo.pojoToJson(obj, jRoot, schema, true);
         } catch (IOException e) {
-            log().e(obj, e);
+            log().e("to json failed", obj, e);
         }
         return jRoot;
     }

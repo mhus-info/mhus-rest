@@ -34,7 +34,7 @@ public interface ObjectTransformer {
             try {
                 return (ObjectTransformer) value[0].getConstructor().newInstance();
             } catch (Throwable t) {
-                MLogUtil.log().f(owner, value[0], t);
+                MLogUtil.log().f("create transformer failed", owner, value[0], t);
                 return new TransformList(); // empty
             }
         } else {
@@ -44,7 +44,7 @@ public interface ObjectTransformer {
                     ObjectTransformer t = (ObjectTransformer) v.getConstructor().newInstance();
                     out.add(t);
                 } catch (Throwable t) {
-                    MLogUtil.log().f(owner, v, t);
+                    MLogUtil.log().f("create transformer failed", owner, v, t);
                 }
             }
             return out;
