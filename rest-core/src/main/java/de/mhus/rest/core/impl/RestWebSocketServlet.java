@@ -94,7 +94,7 @@ public class RestWebSocketServlet extends WebSocketServlet {
     private LinkedList<RestAuthenticator> authenticators = new LinkedList<>();
     private CfgString CFG_TRACE_ACTIVE = new CfgString(getClass(), "traceActivation", "");
     private CfgLong CFG_IDLE_TIMEOUT =
-            new CfgLong(getClass(), "idleTimeout", MPeriod.HOUR_IN_MILLISECOUNDS);
+            new CfgLong(getClass(), "idleTimeout", MPeriod.HOUR_IN_MILLISECONDS);
     private Set<RestWebSocket> sessions = Collections.synchronizedSet(new HashSet<>());
     private Log log = Log.getLog(this);
     private int nextId = 0;

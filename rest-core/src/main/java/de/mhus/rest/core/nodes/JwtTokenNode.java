@@ -39,7 +39,7 @@ import de.mhus.rest.core.result.JsonResult;
 public class JwtTokenNode extends VoidNode {
 
     private CfgString CFG_ROLE_FILTER = new CfgString(JwtTokenNode.class, "roleFilter", "");
-    BearerConfiguration config = new BearerConfiguration(MPeriod.HOUR_IN_MILLISECOUNDS);
+    BearerConfiguration config = new BearerConfiguration(MPeriod.HOUR_IN_MILLISECONDS);
 
     @Override
     protected void doCreate(JsonResult result, CallContext callContext) throws Exception {
