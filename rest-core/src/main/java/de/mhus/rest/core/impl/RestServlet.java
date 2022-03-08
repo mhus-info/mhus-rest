@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.mhus.lib.annotations.service.ServiceComponent;
+import de.mhus.lib.basics.RC;
 import de.mhus.lib.core.IReadProperties;
 import de.mhus.lib.core.M;
 import de.mhus.lib.core.MJson;
@@ -573,15 +574,16 @@ public class RestServlet extends HttpServlet {
         if (errorResultType == null) errorResultType = RESULT_TYPE_JSON;
 
         if (errorResultType.equals(RESULT_TYPE_HTTP)) {
-            resp.sendError(errNr);
+            if (!resp.isCommitted())
+                resp.sendError(RC.normalize(errNr),errMsg);
             resp.getWriter().print(errMsg);
             return;
         }
 
         if (errorResultType.equals(RESULT_TYPE_JSON)) {
 
-            if (errNr == HttpServletResponse.SC_UNAUTHORIZED) resp.setStatus(errNr);
-            else resp.setStatus(HttpServletResponse.SC_OK);
+            if (!resp.isCommitted())
+                resp.sendError(RC.normalize(errNr),errMsg);
 
             PrintWriter w = resp.getWriter();
             ObjectMapper m = new ObjectMapper();
