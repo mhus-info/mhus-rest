@@ -22,7 +22,7 @@ public class RestAuthenticatorByJwt implements RestAuthenticator {
 
     @Override
     public AuthenticationToken authenticate(RestRequest req) {
-        String token = req.getParameter("jwt_token");
+        String token = req.getParameter("_jwt_token");
         if (token != null) return new BearerToken(token);
         String auth = req.getHeader("Authorization");
         if (auth == null || !auth.startsWith("Bearer ")) {
