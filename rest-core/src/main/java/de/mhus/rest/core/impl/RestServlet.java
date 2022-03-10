@@ -35,6 +35,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -596,6 +597,12 @@ public class RestServlet extends HttpServlet {
             if (user != null) json.put("_user", String.valueOf(user.getPrincipal()));
             json.put("_error", errNr);
             json.put("_errorMessage", errMsg);
+            if (errMsg.startsWith("[") && errMsg.endsWith("]")) {
+                try {
+                    JsonNode errArray = MJson.load(errMsg);
+                    json.set("_errorArray", errArray);
+                } catch (Throwable t2) {}
+            }
             if (CFG_TRACE_RETURN.value() && ITracer.get().current() != null)
                 try {
                     ITracer.get()
