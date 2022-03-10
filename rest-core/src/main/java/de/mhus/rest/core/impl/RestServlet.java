@@ -576,14 +576,14 @@ public class RestServlet extends HttpServlet {
         if (errorResultType.equals(RESULT_TYPE_HTTP)) {
             if (!resp.isCommitted())
                 resp.sendError(RC.normalize(errNr),errMsg);
-            resp.getWriter().print(errMsg);
+//            resp.getWriter().print(errMsg);
             return;
         }
 
         if (errorResultType.equals(RESULT_TYPE_JSON)) {
 
             if (!resp.isCommitted())
-                resp.sendError(RC.normalize(errNr),errMsg);
+                resp.setStatus(RC.normalize(errNr));
 
             PrintWriter w = resp.getWriter();
             ObjectMapper m = new ObjectMapper();
