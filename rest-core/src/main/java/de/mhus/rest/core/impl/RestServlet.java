@@ -597,7 +597,7 @@ public class RestServlet extends HttpServlet {
             if (user != null) json.put("_user", String.valueOf(user.getPrincipal()));
             json.put("_error", errNr);
             json.put("_errorMessage", errMsg);
-            if (errMsg.startsWith("[") && errMsg.endsWith("]")) {
+            if (errMsg != null && errMsg.startsWith("[") && errMsg.endsWith("]")) {
                 try {
                     JsonNode errArray = MJson.load(errMsg);
                     json.set("_errorArray", errArray);
