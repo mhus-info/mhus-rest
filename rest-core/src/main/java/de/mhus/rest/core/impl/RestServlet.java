@@ -570,7 +570,10 @@ public class RestServlet extends HttpServlet {
 
         log.d("error", id, errNr, errMsg, t);
 
-        // error result type
+        if (errMsg == null && t != null) errMsg = t.getMessage();
+        if (errMsg == null && t != null) errMsg = t.getClass().getSimpleName();
+
+       // error result type
         String errorResultType = req.getParameter("_errorResult");
         if (errorResultType == null) errorResultType = RESULT_TYPE_JSON;
 
