@@ -386,7 +386,7 @@ public class RestServlet extends HttpServlet {
                         req,
                         resp,
                         HttpServletResponse.SC_NOT_IMPLEMENTED,
-                        null,
+                        "unknown request type",
                         null,
                         null,
                         subject);
