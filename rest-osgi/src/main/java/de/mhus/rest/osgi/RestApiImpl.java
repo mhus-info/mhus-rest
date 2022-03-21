@@ -35,6 +35,7 @@ import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestNodeService;
 import de.mhus.rest.core.api.RestResult;
 import de.mhus.rest.core.api.RestSecurityService;
+import de.mhus.rest.core.api.RestTranslationService;
 import de.mhus.rest.core.impl.AbstractRestApi;
 
 @Component(immediate = true, service = RestApi.class)
@@ -43,8 +44,10 @@ public class RestApiImpl extends AbstractRestApi {
     private BundleContext context;
     private ServiceTracker<RestNodeService, RestNodeService> nodeTracker;
     private ServiceTracker<RestSecurityService, RestSecurityService> securityTracker;
+    private ServiceTracker<RestTranslationService, RestTranslationService> translationTracker;
     public RestSecurityService securityService;
     public ServiceReference<RestSecurityService> securityReference;
+    public RestTranslationService translationService;
 
     @Activate
     public void doActivate(ComponentContext ctx) {
@@ -61,6 +64,14 @@ public class RestApiImpl extends AbstractRestApi {
                         RestSecurityService.class,
                         new RestSecurityServiceTrackerCustomizer());
         securityTracker.open();
+        
+        translationTracker =
+                new ServiceTracker<>(
+                        context,
+                        RestTranslationService.class,
+                        new RestTranslationServiceTrackerCustomizer());
+        translationTracker.open();
+        
     }
 
     @Deactivate
@@ -165,7 +176,40 @@ public class RestApiImpl extends AbstractRestApi {
             }
         }
     }
+    
+    private class RestTranslationServiceTrackerCustomizer
+        implements ServiceTrackerCustomizer<RestTranslationService, RestTranslationService> {
+    
+        @Override
+        public RestTranslationService addingService(ServiceReference<RestTranslationService> reference) {
+        
+            RestTranslationService service = context.getService(reference);
+            if (service != null) {
+                translationService = service;
+                log().i("Found Rest Translation", reference.getBundle().getBundleId());
+            }
+        
+            return service;
+        }
+        
+        @Override
+        public void modifiedService(
+                ServiceReference<RestTranslationService> reference, RestTranslationService service) {
+            if (service != null) {
+                translationService = service;
+                log().i("Modified Rest Translation", reference.getBundle().getBundleId());
+            }
+        }
+        
+        @Override
+        public void removedService(
+                ServiceReference<RestTranslationService> reference, RestTranslationService service) {
+        
+        }
+    }
 
+
+    
     @Override
     public void reset() {
         register.getRegistry().clear();
@@ -240,5 +284,10 @@ public class RestApiImpl extends AbstractRestApi {
             return true;
         }
         return s.checkSecurityResult(callContext, result);
+    }
+    
+    @Override
+    public RestTranslationService getTranslationService() {
+        return translationService;
     }
 }

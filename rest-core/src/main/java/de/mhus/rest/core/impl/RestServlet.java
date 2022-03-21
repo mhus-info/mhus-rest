@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.Servlet;
@@ -67,6 +68,7 @@ import de.mhus.rest.core.api.Node;
 import de.mhus.rest.core.api.RestApi;
 import de.mhus.rest.core.api.RestException;
 import de.mhus.rest.core.api.RestResult;
+import de.mhus.rest.core.api.RestTranslationService;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -600,11 +602,23 @@ public class RestServlet extends HttpServlet {
             if (user != null) json.put("_user", String.valueOf(user.getPrincipal()));
             json.put("_error", errNr);
             json.put("_errorMessage", errMsg);
+            Locale locale = req.getLocale();
             if (errMsg != null && errMsg.startsWith("[") && errMsg.endsWith("]")) {
                 try {
                     JsonNode errArray = MJson.load(errMsg);
                     json.set("_errorArray", errArray);
+                    
+                    // if array was successful, translate error message
+                    String localized = translateError(locale, errArray);
+                    if (localized != null)
+                        json.put("_errorMessage", localized);
                 } catch (Throwable t2) {}
+            } else {
+                String localized = translateError(locale, errMsg);
+                if (localized != null) {
+                    json.put("_errorMessage", localized);
+                    json.put("_errorString", errMsg);
+                }
             }
             if (CFG_TRACE_RETURN.value() && ITracer.get().current() != null)
                 try {
@@ -624,6 +638,22 @@ public class RestServlet extends HttpServlet {
         }
     }
 
+    protected String translateError(Locale locale, JsonNode errArray) {
+        RestApi service = getRestService();
+        if (service == null) return null;
+        RestTranslationService translator = service.getTranslationService();
+        if (translator == null) return null;
+        return translator.translateError(locale, errArray);
+    }
+
+    protected String translateError(Locale locale, String msg) {
+        RestApi service = getRestService();
+        if (service == null) return null;
+        RestTranslationService translator = service.getTranslationService();
+        if (translator == null) return null;
+        return translator.translateError(locale, msg);
+    }
+    
     public LinkedList<RestAuthenticator> getAuthenticators() {
         return authenticators;
     }

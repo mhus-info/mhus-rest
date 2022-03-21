@@ -85,4 +85,6 @@ public interface RestApi {
      * @return Remote IP
      */
     String getRemoteAddress(Object request);
+
+    RestTranslationService getTranslationService();
 }
