@@ -438,26 +438,10 @@ public class RestServlet extends HttpServlet {
             return null;
         } catch (MException t) {
             log.d(t);
-            sendError(
-                    id,
-                    req,
-                    resp,
-                    t.getReturnCode(),
-                    t.getMessage(),
-                    t,
-                    null,
-                    subject);
+            sendError(id, req, resp, t.getReturnCode(), t.getMessage(), t, null, subject);
         } catch (MRuntimeException t) {
             log.d(t);
-            sendError(
-                    id,
-                    req,
-                    resp,
-                    t.getReturnCode(),
-                    t.getMessage(),
-                    t,
-                    null,
-                    subject);
+            sendError(id, req, resp, t.getReturnCode(), t.getMessage(), t, null, subject);
         } catch (Throwable t) {
             log.d(t);
             sendError(
@@ -575,21 +559,19 @@ public class RestServlet extends HttpServlet {
         if (errMsg == null && t != null) errMsg = t.getMessage();
         if (errMsg == null && t != null) errMsg = t.getClass().getSimpleName();
 
-       // error result type
+        // error result type
         String errorResultType = req.getParameter("_errorResult");
         if (errorResultType == null) errorResultType = RESULT_TYPE_JSON;
 
         if (errorResultType.equals(RESULT_TYPE_HTTP)) {
-            if (!resp.isCommitted())
-                resp.sendError(RC.normalize(errNr),errMsg);
-//            resp.getWriter().print(errMsg);
+            if (!resp.isCommitted()) resp.sendError(RC.normalize(errNr), errMsg);
+            //            resp.getWriter().print(errMsg);
             return;
         }
 
         if (errorResultType.equals(RESULT_TYPE_JSON)) {
 
-            if (!resp.isCommitted())
-                resp.setStatus(RC.normalize(errNr));
+            if (!resp.isCommitted()) resp.setStatus(RC.normalize(errNr));
 
             PrintWriter w = resp.getWriter();
             ObjectMapper m = new ObjectMapper();
@@ -607,12 +589,12 @@ public class RestServlet extends HttpServlet {
                 try {
                     JsonNode errArray = MJson.load(errMsg);
                     json.set("_errorArray", errArray);
-                    
+
                     // if array was successful, translate error message
                     String localized = translateError(locale, errArray);
-                    if (localized != null)
-                        json.put("_errorMessage", localized);
-                } catch (Throwable t2) {}
+                    if (localized != null) json.put("_errorMessage", localized);
+                } catch (Throwable t2) {
+                }
             } else {
                 String localized = translateError(locale, errMsg);
                 if (localized != null) {
@@ -653,7 +635,7 @@ public class RestServlet extends HttpServlet {
         if (translator == null) return null;
         return translator.translateError(locale, msg);
     }
-    
+
     public LinkedList<RestAuthenticator> getAuthenticators() {
         return authenticators;
     }
