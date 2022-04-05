@@ -101,6 +101,9 @@ public class RestServlet extends HttpServlet {
     private CfgBoolean CFG_HEADER_TAGS = new CfgBoolean(getClass(), "traceHeader", true);
     private CfgBoolean CFG_TRACE_RETURN = new CfgBoolean(getClass(), "traceReturn", true);
 
+    private CfgString CFG_CORS_ORIGIN = new CfgString(getClass(), "corsOrigin", "*");
+    private CfgString CFG_CORS_HEADERS = new CfgString(getClass(), "corsHeaders", "*");
+    
     public RestServlet() {
         doInitialize();
     }
@@ -119,9 +122,9 @@ public class RestServlet extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // System.out.println(">>> " + req.getPathInfo());
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Origin", CFG_CORS_ORIGIN.value());
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, HEAD, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "*");
+        response.setHeader("Access-Control-Allow-Headers", CFG_CORS_HEADERS.value());
         response.setHeader("Access-Control-Max-Age", "0");
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("Vary", "*");
