@@ -103,7 +103,7 @@ public class RestServlet extends HttpServlet {
 
     private CfgString CFG_CORS_ORIGIN = new CfgString(getClass(), "corsOrigin", "*");
     private CfgString CFG_CORS_HEADERS = new CfgString(getClass(), "corsHeaders", "*");
-    
+
     public RestServlet() {
         doInitialize();
     }
