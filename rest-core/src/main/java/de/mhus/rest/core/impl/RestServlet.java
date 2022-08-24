@@ -405,7 +405,13 @@ public class RestServlet extends HttpServlet {
                     }
                     log.d("result", id, res);
                     int rc = res.getReturnCode();
-                    if (rc < 0) resp.setStatus(-rc);
+                    if (rc < 0)                      // should not happen any more - legacy
+                        resp.setStatus(RC.normalize(-rc));
+                    else
+                    if (rc == 0)                     // legacy
+                        resp.setStatus(RC.OK);
+                    else                             // default
+                        resp.setStatus(RC.normalize(rc));
                     resp.setContentType(res.getContentType(callContext));
                     res.write(callContext, resp.getWriter());
                 }
